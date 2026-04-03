@@ -5,6 +5,8 @@ import Hero from '../components/Hero';
 import Stats from '../components/Stats';
 import ServiceCard from '../components/ServiceCard';
 import ProjectsSlider from '../components/ProjectsSlider';
+import EventSection from '../components/EventSection';
+import ContactSection from '../components/ContactSection';
 
 const HomePage = () => {
   const services = [
@@ -51,22 +53,12 @@ const HomePage = () => {
    {/* Projects Slider Section */}
       <ProjectsSlider />
 
-      {/* CTA Section */}
-      <section className="section-padding bg-gradient-to-r from-amber-600 to-amber-700 text-white" aria-label="Call to Action">
-        <div className="container-custom text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Build Your Future?</h2>
-          <p className="text-lg mb-8 max-w-2xl mx-auto text-amber-50">
-            Join the Omark family and take the first step toward owning your dream home in Ghana.
-          </p>
-          <Link 
-            to="/contact" 
-            className="inline-block bg-white text-amber-700 hover:bg-gray-100 font-semibold px-8 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-amber-600"
-            aria-label="Contact us to start your journey"
-          >
-            Contact Us Today
-          </Link>
-        </div>
-      </section>
+      {/* Event Section */}
+<EventSection />
+
+
+     {/* Contact Section with Portrait Video */}
+      <ContactSection />
     </>
   );
 };
