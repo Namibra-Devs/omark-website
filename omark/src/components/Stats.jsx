@@ -10,7 +10,7 @@ const Stats = () => {
   ];
 
   return (
-    <section className="py-12 bg-amber-600 text-white">
+    <section className="py-12 bg-[#14141D] text-white">
       <div className="container-custom">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {stats.map((stat, index) => (

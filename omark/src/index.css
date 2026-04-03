@@ -1,12 +1,13 @@
-/* index.css - Tailwind CSS v4 imports */
+/* index.css - Tailwind CSS v4 imports with correct color scheme */
 @import "tailwindcss";
 
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-serif: 'Playfair Display', serif;
-  --color-primary: #b8860b;
-  --color-primary-dark: #8b5a2b;
-  --color-gold: #d4af37;
+  --color-primary: #f59e0b;
+  --color-primary-dark: #d97706;
+  --color-gold: #f59e0b;
+  --color-dark: #14141D;
 }
 
 @layer base {
@@ -16,11 +17,13 @@
   
   body {
     font-family: var(--font-sans);
-    color: #1a1a2e;
+    color: #14141D; /* Changed from #1a1a2e to #14141D */
+    background-color: #ffffff;
   }
   
   h1, h2, h3, .font-serif {
     font-family: var(--font-serif);
+    color: #14141D; /* Ensure headings also use dark color */
   }
 }
 
@@ -42,7 +45,28 @@
   }
   
   .gold-accent {
-    @apply w-20 h-1 bg-gold mx-auto mt-4;
+    @apply w-20 h-1 bg-amber-600 mx-auto mt-4;
+  }
+  
+  /* Custom text color utilities */
+  .text-dark {
+    color: #14141D;
+  }
+  
+  .text-amber {
+    color: #f59e0b;
+  }
+  
+  .bg-dark {
+    background-color: #14141D;
+  }
+  
+  .hover\:text-amber:hover {
+    color: #f59e0b;
+  }
+  
+  .hover\:bg-amber:hover {
+    background-color: #f59e0b;
   }
 }
 
@@ -59,4 +83,9 @@
 
 .animate-fadeInUp {
   animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Remove any default color overrides */
+* {
+  border-color: #e5e7eb; /* Keep default border color */
 }

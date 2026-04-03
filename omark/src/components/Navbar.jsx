@@ -1,6 +1,8 @@
-// components/Navbar.jsx
+// components/Navbar.jsx - With consistent colors
 import React, { useState, useEffect } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import DesktopNav from './DesktopNav';
+import MobileNav from './MobileNav';
+import Logo from './Logo';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,69 +16,54 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
-    { path: '/', label: 'Home' },
-    { path: '/about', label: 'About' },
-    { path: '/projects', label: 'Projects' },
-    { path: '/contact', label: 'Contact' },
-  ];
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+  
+  const closeMenu = () => {
+    setIsOpen(false);
+  };
 
   return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-lg' : 'bg-transparent'}`}>
-      <div className="container-custom">
-        <div className="flex justify-between items-center py-4">
-          <Link to="/" className="flex items-center space-x-2">
-            <i className="fas fa-building text-3xl text-amber-600"></i>
-            <span className="font-serif font-bold text-2xl tracking-tight text-gray-800">Omark<span className="text-amber-600">RE</span></span>
-          </Link>
+    <>
+      <nav 
+        className={`fixed top-0 w-full z-50 transition-all duration-500 ${
+          scrolled 
+            ? 'bg-white shadow-xl border-b border-gray-100' 
+            : 'bg-white shadow-md'
+        }`}
+        aria-label="Main navigation"
+      >
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+          <div className="flex justify-between items-center h-20">
+            {/* Logo */}
+            <Logo scrolled={scrolled} />
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex space-x-8">
-            {navLinks.map(link => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                className={({ isActive }) =>
-                  `font-medium transition-all duration-300 ${isActive ? 'text-amber-600 border-b-2 border-amber-600' : 'text-gray-700 hover:text-amber-600'}`
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
+            {/* Desktop Navigation */}
+            <DesktopNav />
+
+            {/* Mobile Menu Button - Chocolate Themed */}
+            <button
+              onClick={toggleMenu}
+              className="md:hidden relative w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 group"
+              aria-label={isOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isOpen}
+              type="button"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-600 to-amber-700 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300"></div>
+              <div className="relative z-10 flex flex-col items-center justify-center w-6 h-6">
+                <span className={`block w-6 h-0.5 bg-white rounded-full transition-all duration-300 ease-out ${isOpen ? 'rotate-45 translate-y-1.5' : '-translate-y-1'}`}></span>
+                <span className={`block w-6 h-0.5 bg-white rounded-full transition-all duration-300 ease-out my-1 ${isOpen ? 'opacity-0' : 'opacity-100'}`}></span>
+                <span className={`block w-6 h-0.5 bg-white rounded-full transition-all duration-300 ease-out ${isOpen ? '-rotate-45 -translate-y-1.5' : 'translate-y-1'}`}></span>
+              </div>
+            </button>
           </div>
-
-          <div className="hidden md:block">
-            <Link to="/contact" className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-full font-semibold transition shadow-md">
-              Get a Quote
-            </Link>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button onClick={() => setIsOpen(!isOpen)} className="md:hidden text-2xl text-gray-700">
-            <i className={`fas ${isOpen ? 'fa-times' : 'fa-bars'}`}></i>
-          </button>
         </div>
-
-        {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="md:hidden pb-5 space-y-3 text-center bg-white rounded-b-2xl shadow-lg">
-            {navLinks.map(link => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setIsOpen(false)}
-                className="block py-2 text-gray-700 hover:text-amber-600 font-medium"
-              >
-                {link.label}
-              </Link>
-            ))}
-            <Link to="/contact" onClick={() => setIsOpen(false)} className="block bg-amber-600 text-white px-6 py-2 rounded-full font-semibold mx-auto w-fit">
-              Get a Quote
-            </Link>
-          </div>
-        )}
-      </div>
-    </nav>
+      </nav>
+      
+      {/* Mobile Navigation */}
+      <MobileNav isOpen={isOpen} closeMenu={closeMenu} />
+    </>
   );
 };
 
