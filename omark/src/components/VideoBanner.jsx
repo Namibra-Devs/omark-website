@@ -58,7 +58,7 @@ const VideoBanner = () => {
           poster="/images/video-poster.jpg"
           onLoadedData={() => setIsVideoLoaded(true)}
         >
-          <source src="/video/hero-video.mp4" type="video/mp4" />
+          <source src="/video/banner.mp4" type="video/mp4" />
           <source src="/video/hero-video.webm" type="video/webm" />
           {/* Fallback image if video fails */}
           <img 
@@ -85,24 +85,7 @@ const VideoBanner = () => {
       {/* Bottom Gradient for smooth transition */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#14141D] to-transparent z-10"></div>
 
-      {/* Video Controls */}
-      <div className="absolute bottom-6 right-6 z-20 flex gap-2">
-        <button
-          onClick={togglePlay}
-          className="bg-white/10 backdrop-blur-md hover:bg-amber-500 text-white p-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-amber-500"
-          aria-label={isPlaying ? 'Pause video' : 'Play video'}
-        >
-          {isPlaying ? <Pause size={18} /> : <Play size={18} />}
-        </button>
-        <button
-          onClick={toggleMute}
-          className="bg-white/10 backdrop-blur-md hover:bg-amber-500 text-white p-2.5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-amber-500"
-          aria-label={isMuted ? 'Unmute video' : 'Mute video'}
-        >
-          {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-        </button>
-      </div>
-
+      
       {/* Hero Content */}
       <div className="relative z-20 h-full flex items-center">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 w-full">
@@ -117,13 +100,11 @@ const VideoBanner = () => {
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
+            <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
               Redefining{' '}
               <span className="text-amber-500 relative inline-block">
                 Homeownership
-                <svg className="absolute -bottom-2 left-0 w-full" height="4" viewBox="0 0 200 4" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M0 2 L200 2" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" strokeDasharray="6 6"/>
-                </svg>
+               
               </span>
               <br />
               in Ghana
@@ -151,38 +132,12 @@ const VideoBanner = () => {
               </Link>
             </div>
 
-            {/* Stats Row */}
-            <div className="flex flex-wrap gap-6 sm:gap-8 mt-10 pt-4 border-t border-white/20">
-              <div>
-                <div className="text-2xl sm:text-3xl font-bold text-amber-500">1.8M+</div>
-                <div className="text-xs sm:text-sm text-gray-300">Housing Deficit</div>
-              </div>
-              <div>
-                <div className="text-2xl sm:text-3xl font-bold text-amber-500">500+</div>
-                <div className="text-xs sm:text-sm text-gray-300">Homes Completed</div>
-              </div>
-              <div>
-                <div className="text-2xl sm:text-3xl font-bold text-amber-500">98%</div>
-                <div className="text-xs sm:text-sm text-gray-300">Client Satisfaction</div>
-              </div>
-              <div>
-                <div className="text-2xl sm:text-3xl font-bold text-amber-500">15+</div>
-                <div className="text-xs sm:text-sm text-gray-300">Years of Excellence</div>
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>
 
-      {/* Scroll Down Indicator */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 hidden md:block">
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-white/60 text-xs uppercase tracking-wider">Scroll</span>
-          <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center">
-            <div className="w-1 h-2 bg-white/60 rounded-full mt-2 animate-bounce"></div>
-          </div>
-        </div>
-      </div>
+     
 
       <style jsx>{`
         @keyframes fadeInUp {

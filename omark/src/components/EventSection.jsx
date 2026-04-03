@@ -256,7 +256,7 @@ const EventSection = () => {
             {currentIndex > 0 && (
               <button
                 onClick={handlePrev}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 w-10 h-10 bg-white shadow-lg hover:bg-amber-600 text-gray-700 hover:text-white rounded-full flex items-center justify-center transition-all duration-300"
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 w-10 h-10 bg-amber-700 shadow-lg hover:bg-amber-600 text-white hover:text-white rounded-full flex items-center justify-center transition-all duration-300 animate-pulse cursor-pointer"
               >
                 <ChevronLeft size={20} />
               </button>
@@ -265,7 +265,7 @@ const EventSection = () => {
             {currentIndex < maxIndex && (
               <button
                 onClick={handleNext}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 w-10 h-10 bg-white shadow-lg hover:bg-amber-600 text-gray-700 hover:text-white rounded-full flex items-center justify-center transition-all duration-300"
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 w-10 h-10 bg-amber-700 shadow-lg hover:bg-amber-600 text-white hover:text-white rounded-full flex items-center justify-center transition-all duration-300 animate-pulse cursor-pointer"
               >
                 <ChevronRight size={20} />
               </button>
