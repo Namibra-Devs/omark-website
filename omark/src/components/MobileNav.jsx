@@ -13,6 +13,7 @@ import {
   Clock,
   ChevronRight,
   Calendar,
+  Image,
 } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -70,6 +71,13 @@ const MobileNav = ({ isOpen, closeMenu }) => {
       icon: Calendar,
       description: "Upcoming events",
     },
+    {
+  path: "/gallery",
+  label: "Gallery",
+  icon: Image,
+  description: "Explore our visuals",
+},
+
 
     {
       path: "/contact",
@@ -116,13 +124,13 @@ const MobileNav = ({ isOpen, closeMenu }) => {
                 }
               }}
             />
-            <div className="hidden bg-gradient-to-br from-amber-600 to-amber-700 p-2 rounded-xl items-center justify-center">
+            <div className="hidden bg-[#7B170F] p-2 rounded-xl items-center justify-center">
               <span className="text-white font-bold">O</span>
             </div>
           </div>
           <button
             onClick={closeMenu}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-amber-100 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#7B170F]"
             aria-label="Close menu"
             type="button"
           >
@@ -142,7 +150,7 @@ const MobileNav = ({ isOpen, closeMenu }) => {
                 className={({ isActive }) =>
                   `flex items-center gap-4 p-4 rounded-xl transition-all duration-300 group ${
                     isActive
-                      ? "bg-amber-50 text-amber-600 border-l-4 border-amber-600"
+                      ? "bg-red-50 text-[#7B170F] border-l-4 border-[#7B170F]"
                       : "hover:bg-gray-50 text-[#14141D]"
                   }`
                 }
@@ -152,15 +160,15 @@ const MobileNav = ({ isOpen, closeMenu }) => {
                     <div
                       className={`p-2 rounded-lg transition-all duration-300 ${
                         isActive
-                          ? "bg-amber-600 text-white"
-                          : "bg-gray-100 text-[#14141D] group-hover:bg-amber-100 group-hover:text-amber-600"
+                          ? "bg-[#7B170F] text-white"
+                          : "bg-gray-100 text-[#14141D] group-hover:bg-red-100 group-hover:text-[#7B170F]"
                       }`}
                     >
                       <Icon size={20} strokeWidth={1.8} />
                     </div>
                     <div className="flex-1">
                       <div
-                        className={`font-semibold ${isActive ? "text-amber-600" : "text-[#14141D] group-hover:text-amber-600"}`}
+                        className={`font-semibold ${isActive ? "text-[#7B170F]" : "text-[#14141D] group-hover:text-[#7B170F]"}`}
                       >
                         {link.label}
                       </div>
@@ -170,7 +178,7 @@ const MobileNav = ({ isOpen, closeMenu }) => {
                     </div>
                     <ChevronRight
                       size={16}
-                      className={`transition-colors ${isActive ? "text-amber-600" : "text-gray-400 group-hover:text-amber-600"}`}
+                      className={`transition-colors ${isActive ? "text-[#7B170F]" : "text-gray-400 group-hover:text-[#7B170F]"}`}
                     />
                   </>
                 )}
@@ -193,15 +201,15 @@ const MobileNav = ({ isOpen, closeMenu }) => {
               const content = item.href ? (
                 <a
                   href={item.href}
-                  className="flex items-center gap-3 text-[#14141D] hover:text-amber-600 transition-colors"
+                  className="flex items-center gap-3 text-[#14141D] hover:text-[#7B170F] transition-colors"
                   onClick={closeMenu}
                 >
-                  <Icon size={18} className="text-amber-600" />
+                  <Icon size={18} className="text-[#7B170F]" />
                   <span className="text-sm">{item.text}</span>
                 </a>
               ) : (
                 <div className="flex items-center gap-3 text-[#14141D]">
-                  <Icon size={18} className="text-amber-600" />
+                  <Icon size={18} className="text-[#7B170F]" />
                   <span className="text-sm">{item.text}</span>
                 </div>
               );
@@ -222,7 +230,7 @@ const MobileNav = ({ isOpen, closeMenu }) => {
               <a
                 key={social.name}
                 href="#"
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-amber-600 hover:text-white transition-all duration-300"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-[#7B170F] hover:text-white transition-all duration-300"
                 aria-label={`Follow us on ${social.name}`}
               >
                 <FontAwesomeIcon icon={social.icon} />

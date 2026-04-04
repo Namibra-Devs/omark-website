@@ -83,12 +83,12 @@ const AboutPage = () => {
         >
           <motion.div variants={fadeInUp} className="space-y-6">
             <div className="inline-flex items-center gap-2">
-              <div className="w-12 h-0.5 bg-amber-500"></div>
-              <span className="text-amber-600 font-semibold uppercase tracking-wider">Our Story</span>
+              <div className="w-12 h-0.5 bg-red-500"></div>
+              <span className="text-red-600 font-semibold uppercase tracking-wider">Our Story</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-serif font-bold text-[#14141D] leading-tight">
               Redefining Standards of
-              <span className="text-amber-500"> Housing</span>
+              <span className="text-[#7B170F]"> Housing</span>
             </h2>
             <div className="space-y-4 text-gray-600 leading-relaxed">
               <p className="text-lg">
@@ -100,8 +100,8 @@ const AboutPage = () => {
             </div>
             
             {/* Quote Block */}
-            <div className="bg-gradient-to-r from-amber-50 to-transparent p-6 rounded-xl border-l-4 border-amber-500 mt-6">
-              <Quote size={32} className="text-amber-500 mb-3 opacity-50" />
+            <div className="bg-gradient-to-r from-red-50 to-transparent p-6 rounded-xl border-l-4 border-red-500 mt-6">
+              <Quote size={32} className="text-[#7B170F] mb-3 opacity-50" />
               <p className="text-gray-700 italic text-lg">
                 "Quality housing should not be a luxury reserved for a few. We operate at the intersection of innovation and reliability."
               </p>
@@ -141,12 +141,12 @@ const AboutPage = () => {
         >
           <motion.div 
             variants={fadeInUp}
-            className="group relative bg-gradient-to-br from-[#14141D] to-[#1a1a25] p-10 rounded-3xl shadow-2xl overflow-hidden cursor-pointer hover:shadow-3xl transition-all duration-500"
+            className="group relative bg-gradient-to-br from-[#14141D] to-[#1a1a25] p-10 rounded-3xl shadow-lg overflow-hidden cursor-pointer hover:shadow-3xl transition-all duration-500"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative z-10">
-              <div className="w-20 h-20 bg-amber-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-amber-500 transition-all duration-300">
-                <Lightbulb size={32} className="text-amber-500 group-hover:text-white transition-colors" />
+              <div className="w-20 h-20 bg-red-500/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-red-500 transition-all duration-300">
+                <Lightbulb size={32} className="text-red-500 group-hover:text-white transition-colors" />
               </div>
               <h2 className="text-3xl font-serif font-bold text-white mb-4">Our Vision</h2>
               <p className="text-gray-300 leading-relaxed text-lg">
@@ -157,12 +157,12 @@ const AboutPage = () => {
 
           <motion.div 
             variants={fadeInUp}
-            className="group relative bg-gradient-to-br from-amber-600 to-amber-700 p-10 rounded-3xl shadow-2xl overflow-hidden cursor-pointer hover:shadow-3xl transition-all duration-500"
+            className="group relative bg-[#7B170F] p-10 rounded-3xl shadow-lg overflow-hidden cursor-pointer hover:shadow-3xl transition-all duration-500"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative z-10">
               <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-white transition-all duration-300">
-                <Target size={32} className="text-white group-hover:text-amber-600 transition-colors" />
+                <Target size={32} className="text-white group-hover:text-red-600 transition-colors" />
               </div>
               <h2 className="text-3xl font-serif font-bold text-white mb-4">Our Mission</h2>
               <p className="text-amber-50 leading-relaxed text-lg">
@@ -182,11 +182,11 @@ const AboutPage = () => {
         >
           <div className="text-center max-w-3xl mx-auto mb-16">
             <motion.div variants={fadeInUp}>
-              <span className="text-amber-600 font-semibold uppercase tracking-wider">Our Foundation</span>
+              <span className="text-red-600 font-semibold uppercase tracking-wider">Our Foundation</span>
               <h2 className="text-4xl md:text-5xl font-serif font-bold text-[#14141D] mt-2">
-                Core <span className="text-amber-700">Values</span>
+                Core <span className="text-red-700">Values</span>
               </h2>
-              <div className="w-20 h-1 bg-amber-500 mx-auto mt-4"></div>
+              <div className="w-20 h-1 bg-red-500 mx-auto mt-4"></div>
               <p className="text-gray-600 mt-6 text-lg">
                 The principles that guide every decision and every project we undertake.
               </p>
@@ -203,8 +203,8 @@ const AboutPage = () => {
                   whileHover={{ y: -8 }}
                   className="bg-white p-6 rounded-md shadow-md border border-gray-100 text-center group hover:shadow-2xl transition-all duration-300"
                 >
-                  <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-amber-500 transition-all duration-300">
-                    <Icon size={24} className="text-amber-600 group-hover:text-white transition-colors" />
+                  <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-red-500 transition-all duration-300">
+                    <Icon size={24} className="text-red-600 group-hover:text-white transition-colors" />
                   </div>
                   <h3 className="text-xl font-bold text-[#14141D] mb-2">{value.title}</h3>
                   <p className="text-gray-500 text-sm">{value.description}</p>
@@ -223,12 +223,12 @@ const AboutPage = () => {
         >
           <div className="bg-[#14141D] rounded-md p-12 shadow-md">
             <div className="text-center max-w-3xl mx-auto mb-12">
-              <span className="text-amber-600 font-semibold uppercase tracking-wider">Our Commitment</span>
+              <span className="text-red-600 font-semibold uppercase tracking-wider">Our Commitment</span>
               <h2 className="text-xl md:text-3xl font-serif font-bold text-white mt-2">
                 Revolutionizing Ghana's
-                <span className="text-amber-700"> Real Estate</span>
+                <span className="text-red-700"> Real Estate</span>
               </h2>
-              <div className="w-20 h-1 bg-amber-500 mx-auto mt-4"></div>
+              <div className="w-20 h-1 bg-red-500 mx-auto mt-4"></div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -264,10 +264,10 @@ const AboutPage = () => {
                   whileHover={{ scale: 1.05 }}
                   className="text-center"
                 >
-                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <item.icon size={28} className="text-amber-600" />
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <item.icon size={28} className="text-red-600" />
                   </div>
-                  <h3 className="text-2xl font-bold text-amber-600">{item.title}</h3>
+                  <h3 className="text-2xl font-bold text-red-600">{item.title}</h3>
                   <p className="font-semibold text-white mb-2">{item.subtitle}</p>
                   <p className="text-gray-300 text-sm">{item.description}</p>
                 </motion.div>

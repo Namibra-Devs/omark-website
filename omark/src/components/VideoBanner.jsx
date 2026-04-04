@@ -73,7 +73,7 @@ const VideoBanner = () => {
       {!isVideoLoaded && (
         <div className="absolute inset-0 bg-gradient-to-r from-[#14141D] to-[#2a2a35] flex items-center justify-center z-10">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-white">Loading...</p>
           </div>
         </div>
@@ -93,16 +93,16 @@ const VideoBanner = () => {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-amber-500/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
               </span>
-              <span className="text-amber-400 text-sm font-semibold">Building Ghana's Future</span>
+              <span className="text-red-400 text-sm font-semibold">Building Ghana's Future</span>
             </div>
 
             {/* Main Heading */}
             <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
               Redefining{' '}
-              <span className="text-amber-500 relative inline-block">
+              <span className="text-red-500 relative inline-block">
                 Homeownership
                
               </span>
@@ -119,7 +119,7 @@ const VideoBanner = () => {
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <Link
                 to="/projects"
-                className="group relative overflow-hidden bg-gradient-to-r from-amber-600 to-amber-700 text-white px-8 py-3.5 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center justify-center gap-2 text-base"
+                className="group relative overflow-hidden bg-[#7B170F] hover:bg-[#14141D] text-white px-8 py-3.5 rounded-md font-semibold transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center justify-center gap-2 text-base"
               >
                 <span>Explore Projects</span>
                 <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />

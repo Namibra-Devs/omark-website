@@ -37,7 +37,7 @@ const HomePage = () => {
       <section className="section-padding bg-[gray-50]" aria-label="Our Services">
         <div className="container-custom">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <span className="text-amber-600 font-semibold uppercase tracking-wide">What We Offer</span>
+            <span className="text-[#7B170F] font-semibold uppercase tracking-wide">What We Offer</span>
             <h2 className="text-3xl md:text-4xl font-bold mt-2 text-dark">Comprehensive Real Estate Solutions</h2>
            
             <p className="mt-4 text-gray-600">From concept to completion, we deliver excellence at every stage of your property journey.</p>

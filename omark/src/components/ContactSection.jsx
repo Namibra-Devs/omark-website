@@ -73,11 +73,11 @@ const socialLinks = [
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <span className="text-amber-500 font-semibold uppercase tracking-wider text-sm">Get In Touch</span>
+          <span className="text-red-500 font-semibold uppercase tracking-wider text-sm">Get In Touch</span>
           <h2 className="text-3xl md:text-4xl font-bold text-white mt-2">
-            Ready to Build Your <span className="text-amber-500">Future?</span>
+            Ready to Build Your <span className="text-red-500">Future?</span>
           </h2>
-          <div className="w-20 h-1 bg-amber-500 mx-auto mt-4"></div>
+          <div className="w-20 h-1 bg-red-500 mx-auto mt-4"></div>
           <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
             Join the Omark family and take the first step toward owning your dream home in Ghana.
           </p>
@@ -94,10 +94,10 @@ const socialLinks = [
                 return (
                   <div
                     key={idx}
-                    className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-amber-500/50 transition-all duration-300 group hover:transform hover:-translate-y-1"
+                    className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:border-red-500/50 transition-all duration-300 group hover:transform hover:-translate-y-1"
                   >
-                    <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-amber-500 transition-colors duration-300">
-                      <Icon size={22} className="text-amber-500 group-hover:text-white transition-colors" />
+                    <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-red-500 transition-colors duration-300">
+                      <Icon size={22} className="text-red-500 group-hover:text-white transition-colors" />
                     </div>
                     <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
                     {item.details.map((detail, i) => (
@@ -105,7 +105,7 @@ const socialLinks = [
                         <a
                           key={i}
                           href={item.link}
-                          className="block text-gray-400 text-sm hover:text-amber-500 transition-colors"
+                          className="block text-gray-400 text-sm hover:text-red-500 transition-colors"
                         >
                           {detail}
                         </a>
@@ -143,7 +143,7 @@ const socialLinks = [
             {/* CTA Button */}
             <Link
               to="/contact"
-              className="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-semibold px-8 py-3.5 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-[#7B170F] hover:bg-white hover:text-[#7B170F] text-white font-semibold px-8 py-3.5 rounded-md transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <Send size={18} />
               Contact Us Today
@@ -195,7 +195,7 @@ const socialLinks = [
 
                 {/* Badge Overlay */}
                 <div className="absolute top-4 left-4 z-10">
-                  <div className="bg-amber-500 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
+                  <div className="bg-[#14141d] text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
                     Welcome to Omark
                   </div>
                 </div>

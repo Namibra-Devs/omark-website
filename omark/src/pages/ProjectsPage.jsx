@@ -323,20 +323,20 @@ const ProjectsPage = () => {
       className="max-w-xl text-left"
     >
       {/* Badge */}
-      <div className="inline-flex items-center gap-2 bg-amber-500/20 backdrop-blur-sm px-3 py-1.5 rounded-full mb-4">
-        <Star size={12} className="text-amber-500 fill-amber-500" />
-        <span className="text-amber-400 text-xs font-semibold">
+      <div className="inline-flex items-center gap-2 bg-red-500/20 backdrop-blur-sm px-3 py-1.5 rounded-full mb-4">
+        <Star size={12} className="text-red-500 fill-red-500" />
+        <span className="text-red-400 text-xs font-semibold">
           Our Portfolio
         </span>
       </div>
 
       {/* Heading (reduced size) */}
       <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-white mb-4 leading-tight">
-        Featured <span className="text-amber-500">Projects</span>
+        Featured <span className="text-red-500">Projects</span>
       </h1>
 
       {/* Divider */}
-      <div className="w-16 h-1 bg-amber-500 mb-4"></div>
+      <div className="w-16 h-1 bg-red-500 mb-4"></div>
 
       {/* Description (smaller + tighter) */}
       <p className="text-sm md:text-base text-gray-300 leading-relaxed">
@@ -362,7 +362,7 @@ const ProjectsPage = () => {
                 placeholder="Search projects..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
 
@@ -370,7 +370,7 @@ const ProjectsPage = () => {
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                className="px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
               >
                 {statuses.map((status) => (
                   <option key={status} value={status}>
@@ -381,7 +381,7 @@ const ProjectsPage = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
+                className="px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 bg-white"
               >
                 {categories.map((category) => (
                   <option key={category} value={category}>
@@ -455,7 +455,7 @@ const ProjectsPage = () => {
                   setSelectedStatus("all");
                   setSelectedCategory("all");
                 }}
-                className="mt-4 text-amber-600 hover:text-amber-700 font-semibold"
+                className="mt-4 text-red-600 hover:text-red-700 font-semibold"
               >
                 Clear filters
               </button>
@@ -493,20 +493,20 @@ const ProjectsPage = () => {
                     {project.status === "Ongoing" && (
                       <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200">
                         <div
-                          className="h-full bg-amber-500 transition-all duration-500"
+                          className="h-full bg-red-500 transition-all duration-500"
                           style={{ width: project.completion }}
                         ></div>
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-amber-600/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    <div className="absolute inset-0 bg-red-600/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
                       <div className="flex gap-4">
-                        <button className="bg-white text-amber-600 p-3 rounded-full hover:scale-110 transition-transform">
+                        <button className="bg-white text-red-600 p-3 rounded-full hover:scale-110 transition-transform">
                           <ZoomIn size={20} />
                         </button>
-                        <button className="bg-white text-amber-600 p-3 rounded-full hover:scale-110 transition-transform">
+                        <button className="bg-white text-red-600 p-3 rounded-full hover:scale-110 transition-transform">
                           <Heart size={20} />
                         </button>
-                        <button className="bg-white text-amber-600 p-3 rounded-full hover:scale-110 transition-transform">
+                        <button className="bg-white text-red-600 p-3 rounded-full hover:scale-110 transition-transform">
                           <Share2 size={20} />
                         </button>
                       </div>
@@ -517,7 +517,7 @@ const ProjectsPage = () => {
                       <MapPin size={12} />
                       <span>{project.location}</span>
                     </div>
-                    <h3 className="text-xl font-bold text-[#14141D] mb-2 group-hover:text-amber-600 transition-colors">
+                    <h3 className="text-xl font-bold text-[#14141D] mb-2 group-hover:text-red-600 transition-colors">
                       {project.title}
                     </h3>
                     <p className="text-gray-600 text-sm mb-4 line-clamp-2">
@@ -525,14 +525,14 @@ const ProjectsPage = () => {
                     </p>
                     <div className="flex justify-between items-center pt-4 border-t border-gray-100">
                       <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <Ruler size={14} className="text-amber-600" />
+                        <Ruler size={14} className="text-red-600" />
                         <span>{project.size}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <Users size={14} className="text-amber-600" />
+                        <Users size={14} className="text-red-600" />
                         <span>{project.units}</span>
                       </div>
-                      <div className="flex items-center gap-1 text-amber-600 font-semibold text-sm group-hover:gap-2 transition-all">
+                      <div className="flex items-center gap-1 text-red-600 font-semibold text-sm group-hover:gap-2 transition-all">
                         Details
                         <ArrowRight
                           size={14}
@@ -567,7 +567,7 @@ const ProjectsPage = () => {
             >
               <button
                 onClick={closeModal}
-                className="absolute top-4 right-4 z-20 w-10 h-10 bg-white/90 hover:bg-amber-500 text-gray-700 hover:text-white rounded-full flex items-center justify-center transition-all duration-300 shadow-lg"
+                className="absolute top-4 right-4 z-20 w-10 h-10 bg-white/90 hover:bg-red-500 cursor-pointer text-gray-700 hover:text-white rounded-full flex items-center justify-center transition-all duration-300 shadow-lg"
               >
                 <X size={20} />
               </button>
@@ -589,14 +589,14 @@ const ProjectsPage = () => {
                     <>
                       <button
                         onClick={prevImage}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#14141D] cursor-pointer animate-pulse hover:bg-amber-500 text-white rounded-full flex items-center justify-center transition-all duration-300 z-10"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#14141D] cursor-pointer animate-pulse hover:bg-red-500 text-white rounded-full flex items-center justify-center transition-all duration-300 z-10"
                         aria-label="Previous image"
                       >
                         <ChevronLeft size={20} />
                       </button>
                       <button
                         onClick={nextImage}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#14141D] cursor-pointer animate-pulse hover:bg-amber-500 text-white rounded-full flex items-center justify-center transition-all duration-300 z-10"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#14141D] cursor-pointer animate-pulse hover:bg-red-500 text-white rounded-full flex items-center justify-center transition-all duration-300 z-10"
                         aria-label="Next image"
                       >
                         <ChevronRight size={20} />
@@ -620,7 +620,7 @@ const ProjectsPage = () => {
                           onClick={() => setCurrentImageIndex(idx)}
                           className={`w-2 h-2 rounded-full transition-all duration-300 ${
                             currentImageIndex === idx
-                              ? "w-6 bg-amber-500"
+                              ? "w-6 bg-red-600"
                               : "bg-white/60 hover:bg-white"
                           }`}
                           aria-label={`Go to image ${idx + 1}`}
@@ -654,28 +654,28 @@ const ProjectsPage = () => {
                 {/* Project Details Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   <div className="bg-gray-50 p-3 rounded-lg text-center">
-                    <Calendar size={18} className="text-amber-600 mx-auto mb-1" />
+                    <Calendar size={18} className="text-red-600 mx-auto mb-1" />
                     <div className="text-xs text-gray-500">Completion</div>
                     <div className="text-sm font-semibold">
                       {selectedProject.completionDate}
                     </div>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg text-center">
-                    <Ruler size={18} className="text-amber-600 mx-auto mb-1" />
+                    <Ruler size={18} className="text-red-600 mx-auto mb-1" />
                     <div className="text-xs text-gray-500">Size</div>
                     <div className="text-sm font-semibold">
                       {selectedProject.size}
                     </div>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg text-center">
-                    <Users size={18} className="text-amber-600 mx-auto mb-1" />
+                    <Users size={18} className="text-red-600 mx-auto mb-1" />
                     <div className="text-xs text-gray-500">Units</div>
                     <div className="text-sm font-semibold">
                       {selectedProject.units}
                     </div>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg text-center">
-                    <Clock size={18} className="text-amber-600 mx-auto mb-1" />
+                    <Clock size={18} className="text-red-600 mx-auto mb-1" />
                     <div className="text-xs text-gray-500">Progress</div>
                     <div className="text-sm font-semibold">
                       {selectedProject.completion}
@@ -694,7 +694,7 @@ const ProjectsPage = () => {
                         key={idx}
                         className="flex items-center gap-2 text-sm text-gray-600"
                       >
-                        <CheckCircle size={14} className="text-amber-600" />
+                        <CheckCircle size={14} className="text-red-600" />
                         <span>{feature}</span>
                       </div>
                     ))}
@@ -705,14 +705,14 @@ const ProjectsPage = () => {
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link
                     to="/contact"
-                    className="flex-1 inline-flex items-center justify-center bg-amber-700 hover:bg-[#14141D] text-white py-3 rounded-md font-semibold transition-all duration-300 shadow-md hover:shadow-xl hover:scale-105 cursor-pointer"
+                    className="flex-1 inline-flex items-center justify-center bg-red-800 hover:bg-[#14141D] text-white py-3 rounded-md font-semibold transition-all duration-300 shadow-md hover:shadow-xl hover:scale-105 cursor-pointer"
                   >
                     Request More Information
                   </Link>
 
                   <button
                     onClick={handleBookVisit}
-                    className="flex-1 inline-flex bg-[#14141D] text-white items-center justify-center gap-2 border-2 border-amber-600 hover:bg-amber-600 hover:text-white py-3 rounded-md font-semibold transition-all duration-300 shadow-md hover:shadow-xl hover:scale-105 cursor-pointer"
+                    className="flex-1 inline-flex bg-[#14141D] text-white items-center justify-center gap-2 border-2 border-red-600 hover:bg-red-800 hover:text-white py-3 rounded-md font-semibold transition-all duration-300 shadow-md hover:shadow-xl hover:scale-105 cursor-pointer"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

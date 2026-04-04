@@ -19,7 +19,7 @@ const PROJECTS = [
       '/images/10.jpeg',
       '/images/11.jpeg',
     ],
-    accent: '#F59E0B',
+    accent: '#7B170F',
   },
   {
     id: 2,
@@ -37,7 +37,7 @@ const PROJECTS = [
       '/images/16.jpeg',
       '/images/17.jpeg',
     ],
-    accent: '#F59E0B',
+    accent: '#7B170F',
   },
   {
     id: 3,
@@ -55,7 +55,7 @@ const PROJECTS = [
       '/images/23.jpeg',
       '/images/20.jpeg',
     ],
-    accent: '#F59E0B',
+    accent: '#7B170F',
   },
   {
     id: 4,
@@ -73,7 +73,7 @@ const PROJECTS = [
       '/images/22.jpeg',
       '/images/30.jpeg',
     ],
-    accent: '#F59E0B',
+    accent: '#7B170F',
   },
   {
     id: 5,
@@ -91,7 +91,7 @@ const PROJECTS = [
       '/images/35.jpeg',
       '/images/36.jpeg',
     ],
-    accent: '#F59E0B',
+    accent: '#7B170F',
   },
   {
     id: 6,
@@ -109,7 +109,7 @@ const PROJECTS = [
       '/images/25.jpeg',
       '/images/33.jpeg',
     ],
-    accent: '#F59E0B',
+    accent: '#7B170F',
   },
 ];
 
@@ -169,7 +169,7 @@ function ProjectModal({ project, onClose }) {
           cursor: 'pointer',
           transition: 'background 0.2s, border-color 0.2s',
         }}
-        onMouseOver={(e) => { e.currentTarget.style.background = '#F59E0B'; e.currentTarget.style.borderColor = '#F59E0B'; e.currentTarget.style.color = '#0E0E1A'; }}
+        onMouseOver={(e) => { e.currentTarget.style.background = '#7B170F'; e.currentTarget.style.borderColor = '#7B170F'; e.currentTarget.style.color = '#0E0E1A'; }}
         onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(14,14,26,0.85)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; e.currentTarget.style.color = '#fff'; }}
         aria-label="Close modal"
       >
@@ -221,7 +221,7 @@ function ProjectModal({ project, onClose }) {
             padding: '5px 14px', borderRadius: 999,
             fontSize: 10, fontWeight: 700,
             letterSpacing: '0.14em', textTransform: 'uppercase',
-            background: '#F59E0B', color: '#0E0E1A',
+            background: '#7B170F', color: '#fff',
           }}>
             {project.tag}
           </span>
@@ -244,7 +244,7 @@ function ProjectModal({ project, onClose }) {
             <>
               <button
                 onClick={(e) => { e.stopPropagation(); prev(); }}
-                onMouseOver={(e) => { e.currentTarget.style.background = '#ce7d05ff'; e.currentTarget.style.color = '#0E0E1A'; }}
+                onMouseOver={(e) => { e.currentTarget.style.background = '#7B170F'; e.currentTarget.style.color = '#0E0E1A'; }}
                 onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.5)'; e.currentTarget.style.color = '#fff'; }}
                 style={{ ...arrowStyle, left: 14 }}
               >
@@ -252,7 +252,7 @@ function ProjectModal({ project, onClose }) {
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); next(); }}
-                onMouseOver={(e) => { e.currentTarget.style.background = '#F59E0B'; e.currentTarget.style.color = '#0E0E1A'; }}
+                onMouseOver={(e) => { e.currentTarget.style.background = '#7B170F'; e.currentTarget.style.color = '#0E0E1A'; }}
                 onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.5)'; e.currentTarget.style.color = '#fff'; }}
                 style={{ ...arrowStyle, right: 14 }}
               >
@@ -275,7 +275,7 @@ function ProjectModal({ project, onClose }) {
                   style={{
                     width: i === imgIdx ? 22 : 6, height: 6,
                     borderRadius: 999, border: 'none', padding: 0,
-                    background: i === imgIdx ? '#F59E0B' : 'rgba(255,255,255,0.35)',
+                    background: i === imgIdx ? '#7B170F' : 'rgba(255,255,255,0.35)',
                     cursor: 'pointer', transition: 'all 0.25s',
                   }}
                 />
@@ -298,7 +298,7 @@ function ProjectModal({ project, onClose }) {
               {project.title}
             </h3>
             <span style={{
-              color: '#F59E0B', fontSize: 12, fontWeight: 600,
+              color: '#7B170F', fontSize: 12, fontWeight: 600,
               display: 'flex', alignItems: 'center', gap: 4,
               flexShrink: 0, marginTop: 3,
               whiteSpace: 'nowrap',
@@ -323,7 +323,7 @@ function ProjectModal({ project, onClose }) {
           }}>
             {Object.entries(project.stats).map(([key, value]) => (
               <div key={key} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 17, fontWeight: 800, color: '#F59E0B', marginBottom: 3 }}>{value}</div>
+                <div style={{ fontSize: 17, fontWeight: 800, color: '#7B170F', marginBottom: 3 }}>{value}</div>
                 <div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255,255,255,0.35)' }}>{key}</div>
               </div>
             ))}
@@ -333,7 +333,7 @@ function ProjectModal({ project, onClose }) {
             style={{
               width: '100%', padding: '14px',
               borderRadius: 12,
-              background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+              background: 'linear-gradient(135deg, #7B170F, #a52a22ff)',
               color: '#0E0E1A', fontWeight: 800, fontSize: 13,
               letterSpacing: '0.07em', textTransform: 'uppercase',
               border: 'none', cursor: 'pointer', transition: 'opacity 0.2s',
@@ -407,7 +407,7 @@ function ProjectCard({ project, onOpen }) {
           letterSpacing: '0.12em',
           textTransform: 'uppercase',
           background: 'rgba(245,158,11,0.15)',
-          color: '#F59E0B',
+          color: '#7B170F',
           border: '1px solid rgba(245,158,11,0.3)',
           backdropFilter: 'blur(6px)',
         }}>
@@ -421,7 +421,7 @@ function ProjectCard({ project, onOpen }) {
           color: 'rgba(255,255,255,0.75)',
           fontSize: 12,
         }}>
-          <MapPin size={12} style={{ color: '#F59E0B', flexShrink: 0 }} />
+          <MapPin size={12} style={{ color: '#7B170F', flexShrink: 0 }} />
           <span>{project.location}</span>
         </div>
 
@@ -436,8 +436,8 @@ function ProjectCard({ project, onOpen }) {
             style={{
               padding: '6px 14px',
               borderRadius: 8,
-              background: '#F59E0B',
-              color: '#0E0E1A',
+              background: '#7B170F',
+              color: '#fff',
               fontWeight: 700,
               fontSize: 11,
               letterSpacing: '0.08em',
@@ -461,7 +461,7 @@ function ProjectCard({ project, onOpen }) {
           color: '#fff',
           fontFamily: "'Playfair Display', Georgia, serif",
           transition: 'color 0.2s',
-          color: hovered ? '#F59E0B' : '#fff',
+          color: hovered ? '#7B170F' : '#fff',
           lineHeight: 1.25,
         }}>
           {project.title}
@@ -491,7 +491,7 @@ function ProjectCard({ project, onOpen }) {
         }}>
           {Object.entries(project.stats).map(([key, value]) => (
             <div key={key} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 13, fontWeight: 800, color: '#F59E0B', marginBottom: 2 }}>{value}</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#7B170F', marginBottom: 2 }}>{value}</div>
               <div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.35)' }}>{key}</div>
             </div>
           ))}
@@ -592,7 +592,7 @@ export default function ProjectsSlider() {
           backdrop-filter: blur(8px);
           flex-shrink: 0;
         }
-        .ps-arrow:hover { background: #F59E0B; border-color: #F59E0B; color: #0E0E1A; }
+        .ps-arrow:hover { background: #7B170F; border-color: #7B170F; color: #fff; }
         .ps-arrow:disabled { opacity: 0.25; cursor: not-allowed; }
         .ps-arrow:disabled:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12); color: #fff; }
 
@@ -646,7 +646,7 @@ export default function ProjectsSlider() {
                 fontWeight: 700,
                 letterSpacing: '0.2em',
                 textTransform: 'uppercase',
-                color: '#F59E0B',
+                color: '#b52015ff',
               }}>
                 Our Portfolio
               </p>
@@ -659,7 +659,7 @@ export default function ProjectsSlider() {
                 lineHeight: 1.15,
               }}>
                 Featured
-                <span style={{ color: '#f5880bff' }}>Projects</span>
+                <span style={{ color: '#b52015ff' }}>Projects</span>
               </h2>
               
             </div>
@@ -722,7 +722,7 @@ export default function ProjectsSlider() {
                   onClick={() => goTo(i)}
                   style={{
                     width: i === currentIndex ? 28 : 6,
-                    background: i === currentIndex ? '#F59E0B' : 'rgba(255,255,255,0.2)',
+                    background: i === currentIndex ? '#b52015ff' : 'rgba(255,255,255,0.2)',
                   }}
                   aria-label={`Go to slide ${i + 1}`}
                 />

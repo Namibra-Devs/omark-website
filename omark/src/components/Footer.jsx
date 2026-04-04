@@ -119,14 +119,14 @@ const Footer = () => {
             <div>
               <h4 className="text-white font-semibold text-lg mb-4 relative inline-block">
                 Quick Links
-                <div className="absolute -bottom-2 left-0 w-12 h-0.5 bg-amber-500 rounded-full"></div>
+                <div className="absolute -bottom-2 left-0 w-12 h-0.5 bg-red-500 rounded-full"></div>
               </h4>
               <ul className="space-y-2">
                 {quickLinks.map((link, idx) => (
                   <li key={idx}>
                     <Link
                       to={link.path}
-                      className="text-gray-400 hover:text-amber-500 transition-all duration-300 text-sm flex items-center gap-2 group"
+                      className="text-gray-400 hover:text-red-500 transition-all duration-300 text-sm flex items-center gap-2 group"
                     >
                       <ArrowRight
                         size={12}
@@ -145,14 +145,14 @@ const Footer = () => {
             <div>
               <h4 className="text-white font-semibold text-lg mb-4 relative inline-block">
                 Our Services
-                <div className="absolute -bottom-2 left-0 w-12 h-0.5 bg-amber-500 rounded-full"></div>
+                <div className="absolute -bottom-2 left-0 w-12 h-0.5 bg-red-500 rounded-full"></div>
               </h4>
               <ul className="space-y-2">
                 {services.map((service, idx) => (
                   <li key={idx}>
                     <Link
                       to={service.path}
-                      className="text-gray-400 hover:text-amber-500 transition-all duration-300 text-sm flex items-center gap-2 group"
+                      className="text-gray-400 hover:text-red-500 transition-all duration-300 text-sm flex items-center gap-2 group"
                     >
                       <ArrowRight
                         size={12}
@@ -171,7 +171,7 @@ const Footer = () => {
             <div>
               <h4 className="text-white font-semibold text-lg mb-4 relative inline-block">
                 Contact Info
-                <div className="absolute -bottom-2 left-0 w-12 h-0.5 bg-amber-500 rounded-full"></div>
+                <div className="absolute -bottom-2 left-0 w-12 h-0.5 bg-red-500 rounded-full"></div>
               </h4>
               <ul className="space-y-3 mb-6">
                 {contactInfo.map((item, idx) => {
@@ -179,11 +179,11 @@ const Footer = () => {
                   const content = item.link ? (
                     <a
                       href={item.link}
-                      className="text-gray-400 hover:text-amber-500 transition-colors text-sm flex items-start gap-3"
+                      className="text-gray-400 hover:text-red-500 transition-colors text-sm flex items-start gap-3"
                     >
                       <Icon
                         size={16}
-                        className="text-amber-500 flex-shrink-0 mt-0.5"
+                        className="text-red-500 flex-shrink-0 mt-0.5"
                       />
                       <span>{item.text}</span>
                     </a>
@@ -191,7 +191,7 @@ const Footer = () => {
                     <li key={idx} className="flex items-start gap-3">
                       <Icon
                         size={16}
-                        className="text-amber-500 flex-shrink-0 mt-0.5"
+                        className="text-red-500 flex-shrink-0 mt-0.5"
                       />
                       <span className="text-gray-400 text-sm">{item.text}</span>
                     </li>
@@ -204,7 +204,7 @@ const Footer = () => {
               <div className="flex items-start gap-3">
                 <Clock
                   size={16}
-                  className="text-amber-500 flex-shrink-0 mt-0.5"
+                  className="text-red-500 flex-shrink-0 mt-0.5"
                 />
                 <div>
                   <p className="text-gray-400 text-sm">
@@ -228,19 +228,19 @@ const Footer = () => {
             <div className="flex gap-6">
               <Link
                 to="/privacy"
-                className="text-gray-500 text-xs hover:text-amber-500 transition"
+                className="text-gray-500 text-xs hover:text-red-500 transition"
               >
                 Privacy Policy
               </Link>
               <Link
                 to="/terms"
-                className="text-gray-500 text-xs hover:text-amber-500 transition"
+                className="text-gray-500 text-xs hover:text-red-500 transition"
               >
                 Terms of Service
               </Link>
               <Link
                 to="/faq"
-                className="text-gray-500 text-xs hover:text-amber-500 transition"
+                className="text-gray-500 text-xs hover:text-red-500 transition"
               >
                 FAQ
               </Link>

@@ -10,7 +10,7 @@ import ContactPage from "./pages/ContactPage";
 import ScrollToTop from "./components/ScrollToTop";
 import EventsPage from "./pages/EventsPage";
 import EventDetailPage from "./pages/EventDetailPage";
-
+import GalleryPage from './pages/GalleryPage';
 
 function App() {
   return (
@@ -25,6 +25,7 @@ function App() {
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/events/:id" element={<EventDetailPage />} />
+            <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/contact" element={<ContactPage />} />
           </Routes>
         </main>

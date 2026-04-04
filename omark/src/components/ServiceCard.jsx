@@ -20,7 +20,7 @@ const ServiceCard = ({ title, desc }) => {
   return (
     <div className="bg-[#14141D] p-6 rounded-md shadow-md hover:shadow-xl transition-all duration-300 text-center group">
       {/* Image Container */}
-      <div className="w-40 h-40 rounded-md flex items-center justify-center mx-auto mb-4 group-hover:bg-gradient-to-br from-amber-500 to-amber-600 transition-all duration-300 shadow-sm group-hover:shadow-lg">
+      <div className="w-40 h-40 rounded-md flex items-center justify-center mx-auto mb-4 group-hover:bg-[#7B170F] transition-all duration-300 shadow-sm group-hover:shadow-lg">
         <img
           src={icon}
           alt={title}

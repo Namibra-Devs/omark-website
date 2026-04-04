@@ -193,11 +193,11 @@ const EventSection = () => {
         <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 relative z-10">
           {/* Header */}
           <div className="text-center mb-12">
-            <span className="text-amber-600 font-semibold uppercase tracking-wider text-sm">Upcoming Events</span>
+            <span className="text-[#7B170F] font-semibold uppercase tracking-wider text-sm">Upcoming Events</span>
             <h2 className="text-3xl md:text-4xl font-bold text-[#14141D] mt-2">
-              Join Our <span className="text-amber-600">Community Events</span>
+              Join Our <span className="text-red-800">Community Events</span>
             </h2>
-            <div className="w-20 h-1 bg-amber-600 mx-auto mt-4"></div>
+            <div className="w-20 h-1 bg-[#7B170F] mx-auto mt-4"></div>
             <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
               Stay connected with Omark through our exciting events, workshops, and community gatherings
             </p>
@@ -205,7 +205,7 @@ const EventSection = () => {
 
           {/* Featured Event Banner */}
           {featuredEvents.length > 0 && (
-            <div className="mb-16 bg-gradient-to-r from-amber-600 to-amber-800 rounded-md overflow-hidden shadow-xl">
+            <div className="mb-16 bg-[#7B170F] rounded-md overflow-hidden shadow-xl">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="p-8 md:p-10 text-white">
                   <span className="inline-block bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold mb-4">
@@ -229,7 +229,7 @@ const EventSection = () => {
                   </div>
                   <button
                     onClick={() => openModal(featuredEvents[0])}
-                    className="inline-flex items-center gap-2 bg-white text-amber-700 px-6 py-2.5 rounded-md font-semibold hover:bg-[#14141D] hover:text-white cursor-pointer transition-all duration-300 shadow-lg"
+                    className="inline-flex items-center gap-2 bg-white text-[#7B170F] px-6 py-2.5 rounded-md font-semibold hover:bg-[#14141D] hover:text-white cursor-pointer transition-all duration-300 shadow-lg"
                   >
                     Register Now
                     <ArrowRight size={18} />
@@ -256,7 +256,7 @@ const EventSection = () => {
             {currentIndex > 0 && (
               <button
                 onClick={handlePrev}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 w-10 h-10 bg-amber-700 shadow-lg hover:bg-amber-600 text-white hover:text-white rounded-full flex items-center justify-center transition-all duration-300 animate-pulse cursor-pointer"
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 w-10 h-10 bg-[#7B170F] shadow-lg hover:bg-[#14141D] text-white hover:text-white rounded-full flex items-center justify-center transition-all duration-300 animate-pulse cursor-pointer"
               >
                 <ChevronLeft size={20} />
               </button>
@@ -265,7 +265,7 @@ const EventSection = () => {
             {currentIndex < maxIndex && (
               <button
                 onClick={handleNext}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 w-10 h-10 bg-amber-700 shadow-lg hover:bg-amber-600 text-white hover:text-white rounded-full flex items-center justify-center transition-all duration-300 animate-pulse cursor-pointer"
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 w-10 h-10 bg-[#7B170F] shadow-lg hover:bg-[#14141D] text-white hover:text-white rounded-full flex items-center justify-center transition-all duration-300 animate-pulse cursor-pointer"
               >
                 <ChevronRight size={20} />
               </button>
@@ -293,7 +293,7 @@ const EventSection = () => {
                         }}
                       />
                       <div className="absolute top-3 left-3">
-                        <span className="inline-block bg-amber-600 text-white px-2 py-1 rounded-lg text-xs font-semibold">
+                        <span className="inline-block bg-[#7B170F] text-white px-2 py-1 rounded-lg text-xs font-semibold">
                           {event.category}
                         </span>
                       </div>
@@ -312,7 +312,7 @@ const EventSection = () => {
                         </div>
                       </div>
                       
-                      <h3 className="text-lg font-bold text-[#14141D] mb-2 group-hover:text-amber-600 transition-colors line-clamp-1">
+                      <h3 className="text-lg font-bold text-[#14141D] mb-2 group-hover:text-[#7B170F] transition-colors line-clamp-1">
                         {event.title}
                       </h3>
                       
@@ -327,7 +327,7 @@ const EventSection = () => {
                         </div>
                         <button
                           onClick={() => openModal(event)}
-                          className="text-amber-600 font-semibold text-sm hover:gap-2 hover:text-[#14141D] cursor-pointer transition-all inline-flex items-center gap-1"
+                          className="text-[#7B170F] font-semibold text-sm hover:gap-2 hover:text-[#14141D] cursor-pointer transition-all inline-flex items-center gap-1"
                         >
                           Register
                           <ArrowRight size={14} />
@@ -344,7 +344,7 @@ const EventSection = () => {
           <div className="text-center mt-12">
             <Link
               to="/events"
-              className="inline-flex items-center gap-2 bg-amber-600 hover:bg-[#14141D] hover:text-white text-white px-8 py-3 rounded-md font-semibold transition-all duration-300 shadow-md hover:shadow-md"
+              className="inline-flex items-center gap-2 bg-[#7B170F] hover:bg-[#14141D] hover:text-white text-white px-8 py-3 rounded-md font-semibold transition-all duration-300 shadow-md hover:shadow-md"
             >
               View All Events
               <ArrowRight size={18} />
@@ -365,7 +365,7 @@ const EventSection = () => {
               </div>
               <button
                 onClick={closeModal}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-amber-100 transition-colors"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 transition-colors cursor-pointer"
               >
                 <X size={20} className="text-gray-600" />
               </button>
@@ -385,25 +385,25 @@ const EventSection = () => {
             ) : (
               <form onSubmit={handleSubmit} className="p-6 space-y-5">
                 {/* Event Details Summary */}
-                <div className="bg-amber-50 rounded-xl p-4 mb-4">
+                <div className="bg-red-50 rounded-xl p-4 mb-4">
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar size={14} className="text-amber-600" />
+                      <Calendar size={14} className="text-[#7B170F]" />
                       <span>{selectedEvent.date}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
-                      <Clock size={14} className="text-amber-600" />
+                      <Clock size={14} className="text-[#7B170F]" />
                       <span>{selectedEvent.time}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600 col-span-2">
-                      <MapPin size={14} className="text-amber-600" />
+                      <MapPin size={14} className="text-[#7B170F]" />
                       <span>{selectedEvent.location}</span>
                     </div>
                   </div>
-                  <div className="mt-3 pt-3 border-t border-amber-200">
+                  <div className="mt-3 pt-3 border-t border-red-200">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Spots Available:</span>
-                      <span className="font-semibold text-amber-600">{getAvailableSpots(selectedEvent)} remaining</span>
+                      <span className="font-semibold text-red-600">{getAvailableSpots(selectedEvent)} remaining</span>
                     </div>
                   </div>
                 </div>
@@ -419,7 +419,7 @@ const EventSection = () => {
                       required
                       value={formData.fullName}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                       placeholder="Enter your full name"
                     />
                   </div>
@@ -435,7 +435,7 @@ const EventSection = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                       placeholder="you@example.com"
                     />
                   </div>
@@ -451,7 +451,7 @@ const EventSection = () => {
                       required
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                       placeholder="+233 XX XXX XXXX"
                     />
                   </div>
@@ -463,7 +463,7 @@ const EventSection = () => {
                     name="numberOfGuests"
                     value={formData.numberOfGuests}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                   >
                     {[1, 2, 3, 4, 5].map(num => (
                       <option key={num} value={num}>{num} {num === 1 ? 'person' : 'people'}</option>
@@ -478,14 +478,14 @@ const EventSection = () => {
                     rows={2}
                     value={formData.specialRequests}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                     placeholder="Dietary restrictions, accessibility needs, etc."
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-amber-700 hover:bg-[#14141D] text-white hover:text-amber-700 py-3 rounded-md cursor-pointer font-semibold transition-all duration-300 shadow-md hover:shadow-xl inline-flex items-center justify-center gap-2"
+                  className="w-full bg-[#7B170F] hover:bg-[#14141D] text-white hover:text-red-700 py-3 rounded-md cursor-pointer font-semibold transition-all duration-300 shadow-md hover:shadow-xl inline-flex items-center justify-center gap-2"
                 >
                   Complete Registration
                   <Send size={18} />

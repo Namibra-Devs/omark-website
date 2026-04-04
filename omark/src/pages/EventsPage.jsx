@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, MapPin, Clock, ArrowRight, Search, Filter, ChevronDown, X, User, Mail, Phone, Send, CheckCircle } from 'lucide-react';
+import Stats from '@/components/Stats';
+import VideoBanner from '@/components/VideoBanner';
 
 const EventsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,7 +30,7 @@ const EventsPage = () => {
       date: 'April 25, 2025',
       time: '10:00 AM - 4:00 PM',
       location: 'Pankrono Gardens Estate, Kumasi',
-      image: '/images/event1.jpg',
+      image: '/images/2.jpeg',
       category: 'Open House',
       status: 'Upcoming',
       maxAttendees: 100,
@@ -41,7 +43,7 @@ const EventsPage = () => {
       date: 'May 10, 2025',
       time: '2:00 PM - 6:00 PM',
       location: 'Omark Head Office, Atimatim',
-      image: '/images/event2.jpg',
+      image: '/images/event2.jpeg',
       category: 'Seminar',
       status: 'Upcoming',
       maxAttendees: 50,
@@ -54,7 +56,7 @@ const EventsPage = () => {
       date: 'May 20, 2025',
       time: '9:00 AM - 5:00 PM',
       location: 'Green Building Center, Kumasi',
-      image: '/images/event3.jpg',
+      image: '/images/hero1.jpeg',
       category: 'Workshop',
       status: 'Limited Spots',
       maxAttendees: 30,
@@ -67,7 +69,7 @@ const EventsPage = () => {
       date: 'June 5, 2025',
       time: '10:00 AM - 7:00 PM',
       location: 'Kumasi City Mall',
-      image: '/images/event4.jpg',
+      image: '/images/1.jpeg',
       category: 'Expo',
       status: 'Upcoming',
       maxAttendees: 200,
@@ -80,7 +82,7 @@ const EventsPage = () => {
       date: 'June 15, 2025',
       time: '11:00 AM - 6:00 PM',
       location: 'Heritage Villas, East Legon',
-      image: '/images/event5.jpg',
+      image: '/images/event3.jpeg',
       category: 'Community',
       status: 'Upcoming',
       maxAttendees: 150,
@@ -93,7 +95,7 @@ const EventsPage = () => {
       date: 'June 28, 2025',
       time: '9:00 AM - 4:00 PM',
       location: 'Omark Construction Site Office',
-      image: '/images/event6.jpg',
+      image: '/images/21.jpeg',
       category: 'Career Fair',
       status: 'Upcoming',
       maxAttendees: 80,
@@ -186,17 +188,15 @@ const EventsPage = () => {
   {/* Background */}
   <div className="absolute inset-0 z-0">
     <img
-      src="/images/hero1.jpeg"
+      src="/images/event1.jpeg"
       alt="Events at Omark Real Estate"
       className="w-full h-full object-cover"
     />
 
   </div>
-
-  {/* Content */}
-  <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 text-center pt-20">
-    {/* your content stays the same */}
-  </div>
+    {/* Left → Right Gradient */}
+    <div className="absolute inset-0 bg-gradient-to-r from-[#14141D]/95 via-transparent to-transparent"></div>
+    
 </section>
 
       {/* Search and Filter Section */}
@@ -211,7 +211,7 @@ const EventsPage = () => {
                 placeholder="Search events..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
 
@@ -223,7 +223,7 @@ const EventsPage = () => {
                   onClick={() => setSelectedCategory(category)}
                   className={`px-4 py-2 rounded-lg capitalize transition-all duration-300 ${
                     selectedCategory === category
-                      ? 'bg-amber-600 text-white'
+                      ? 'bg-red-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -256,7 +256,7 @@ const EventsPage = () => {
                     }}
                     className={`px-3 py-1.5 rounded-lg capitalize text-sm transition-all ${
                       selectedCategory === category
-                        ? 'bg-amber-600 text-white'
+                        ? 'bg-red-600 text-white'
                         : 'bg-white text-gray-700 border border-gray-200'
                     }`}
                   >
@@ -282,7 +282,7 @@ const EventsPage = () => {
                   setSearchTerm('');
                   setSelectedCategory('all');
                 }}
-                className="mt-4 text-amber-600 hover:text-amber-700 font-semibold"
+                className="mt-4 text-red-600 hover:text-red-700 font-semibold"
               >
                 Clear filters
               </button>
@@ -304,7 +304,7 @@ const EventsPage = () => {
                       }}
                     />
                     <div className="absolute top-3 left-3 flex gap-2">
-                      <span className="inline-block bg-amber-600 text-white px-2 py-1 rounded-lg text-xs font-semibold">
+                      <span className="inline-block bg-red-600 text-white px-2 py-1 rounded-lg text-xs font-semibold">
                         {event.category}
                       </span>
                       <span className={`inline-block px-2 py-1 rounded-lg text-xs font-semibold ${getStatusColor(event.status)}`}>
@@ -332,7 +332,7 @@ const EventsPage = () => {
                       </div>
                     </div>
                     
-                    <h3 className="text-xl font-bold text-[#14141D] mb-2 group-hover:text-amber-600 transition-colors line-clamp-1">
+                    <h3 className="text-xl font-bold text-[#14141D] mb-2 group-hover:text-red-600 transition-colors line-clamp-1">
                       {event.title}
                     </h3>
                     
@@ -347,7 +347,7 @@ const EventsPage = () => {
                     
                     <div className="flex items-center justify-between mb-4">
                       <div className="text-xs text-gray-500">
-                        <span className="font-semibold text-amber-600">{getAvailableSpots(event)}</span> spots remaining
+                        <span className="font-semibold text-red-600">{getAvailableSpots(event)}</span> spots remaining
                       </div>
                       <div className="text-xs text-gray-500">
                         <span className="font-semibold">{event.currentRegistrations}</span> registered
@@ -356,7 +356,7 @@ const EventsPage = () => {
                     
                     <button
                       onClick={() => openModal(event)}
-                      className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white py-2.5 rounded-lg font-semibold transition-all duration-300 shadow-md hover:shadow-xl inline-flex items-center justify-center gap-2"
+                      className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 cursor-pointer text-white py-2.5 rounded-md font-semibold transition-all duration-300 shadow-md hover:shadow-xl inline-flex items-center justify-center gap-2"
                     >
                       Register Now
                       <ArrowRight size={16} />
@@ -369,25 +369,8 @@ const EventsPage = () => {
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="py-16 bg-[#14141D] text-white">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 text-center">
-          <h3 className="text-2xl md:text-3xl font-bold mb-3">Stay Updated</h3>
-          <p className="text-gray-400 mb-6 max-w-md mx-auto">
-            Subscribe to our newsletter for event announcements and real estate insights
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Your email address"
-              className="flex-1 px-4 py-2.5 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
-            />
-            <button className="bg-amber-600 hover:bg-amber-700 px-6 py-2.5 rounded-lg font-semibold transition-all duration-300">
-              Subscribe
-            </button>
-          </div>
-        </div>
-      </section>
+     <Stats/>
+     <VideoBanner/>
 
       {/* Registration Modal */}
       {isModalOpen && selectedEvent && (
@@ -401,7 +384,7 @@ const EventsPage = () => {
               </div>
               <button
                 onClick={closeModal}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-amber-100 transition-colors"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 cursor-pointer transition-colors"
               >
                 <X size={20} className="text-gray-600" />
               </button>
@@ -421,25 +404,25 @@ const EventsPage = () => {
             ) : (
               <form onSubmit={handleSubmit} className="p-6 space-y-5">
                 {/* Event Details Summary */}
-                <div className="bg-amber-50 rounded-xl p-4 mb-4">
+                <div className="bg-red-50 rounded-xl p-4 mb-4">
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar size={14} className="text-amber-600" />
+                      <Calendar size={14} className="text-red-600" />
                       <span>{selectedEvent.date}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600">
-                      <Clock size={14} className="text-amber-600" />
+                      <Clock size={14} className="text-red-600" />
                       <span>{selectedEvent.time}</span>
                     </div>
                     <div className="flex items-center gap-2 text-gray-600 col-span-2">
-                      <MapPin size={14} className="text-amber-600" />
+                      <MapPin size={14} className="text-red-600" />
                       <span>{selectedEvent.location}</span>
                     </div>
                   </div>
-                  <div className="mt-3 pt-3 border-t border-amber-200">
+                  <div className="mt-3 pt-3 border-t border-red-200">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Spots Available:</span>
-                      <span className="font-semibold text-amber-600">{getAvailableSpots(selectedEvent)} remaining</span>
+                      <span className="font-semibold text-red-600">{getAvailableSpots(selectedEvent)} remaining</span>
                     </div>
                   </div>
                 </div>
@@ -455,7 +438,7 @@ const EventsPage = () => {
                       required
                       value={formData.fullName}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                       placeholder="Enter your full name"
                     />
                   </div>
@@ -471,7 +454,7 @@ const EventsPage = () => {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                       placeholder="you@example.com"
                     />
                   </div>
@@ -487,7 +470,7 @@ const EventsPage = () => {
                       required
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                       placeholder="+233 XX XXX XXXX"
                     />
                   </div>
@@ -499,7 +482,7 @@ const EventsPage = () => {
                     name="numberOfGuests"
                     value={formData.numberOfGuests}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                   >
                     {[1, 2, 3, 4, 5].map(num => (
                       <option key={num} value={num}>{num} {num === 1 ? 'person' : 'people'}</option>
@@ -514,14 +497,14 @@ const EventsPage = () => {
                     rows={2}
                     value={formData.specialRequests}
                     onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                     placeholder="Dietary restrictions, accessibility needs, etc."
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white py-3 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-xl inline-flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 cursor-pointer text-white py-3 rounded-md font-semibold transition-all duration-300 shadow-md hover:shadow-xl inline-flex items-center justify-center gap-2"
                 >
                   Complete Registration
                   <Send size={18} />

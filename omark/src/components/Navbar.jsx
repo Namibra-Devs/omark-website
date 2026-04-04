@@ -45,12 +45,12 @@ const Navbar = () => {
             {/* Mobile Menu Button - Chocolate Themed */}
             <button
               onClick={toggleMenu}
-              className="md:hidden relative w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 group"
+              className="md:hidden relative w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 group"
               aria-label={isOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isOpen}
               type="button"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-600 to-amber-700 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-red-600 to-red-700 rounded-xl shadow-md group-hover:shadow-xl transition-all duration-300"></div>
               <div className="relative z-10 flex flex-col items-center justify-center w-6 h-6">
                 <span className={`block w-6 h-0.5 bg-white rounded-full transition-all duration-300 ease-out ${isOpen ? 'rotate-45 translate-y-1.5' : '-translate-y-1'}`}></span>
                 <span className={`block w-6 h-0.5 bg-white rounded-full transition-all duration-300 ease-out my-1 ${isOpen ? 'opacity-0' : 'opacity-100'}`}></span>
