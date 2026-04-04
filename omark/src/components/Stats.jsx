@@ -42,7 +42,7 @@ const Stats = () => {
 
           <button
             onClick={handleBookVisit}
-            className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-md transition-all duration-300 shadow-md hover:shadow-xl hover:scale-105 cursor-pointer"
+            className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded- transition-all duration-300 shadow-md hover:shadow-xl hover:scale-105 cursor-pointer"
           >
             {/* WhatsApp Icon (Lucide-style SVG) */}
             <svg

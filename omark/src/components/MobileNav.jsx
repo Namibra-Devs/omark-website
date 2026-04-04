@@ -12,6 +12,7 @@ import {
   MapPin,
   Clock,
   ChevronRight,
+  Calendar,
 } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -64,6 +65,13 @@ const MobileNav = ({ isOpen, closeMenu }) => {
       description: "View our work",
     },
     {
+      path: "/events",
+      label: "Events",
+      icon: Calendar,
+      description: "Upcoming events",
+    },
+
+    {
       path: "/contact",
       label: "Contact",
       icon: Mail,
@@ -91,7 +99,7 @@ const MobileNav = ({ isOpen, closeMenu }) => {
 
       {/* Mobile Menu Panel */}
       <div
-        className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-50 md:hidden overflow-y-auto"
+        className="fixed top-0 left-0 h-full w-full bg-white shadow-2xl z-50 md:hidden overflow-y-auto"
         style={{ animation: "slideInRight 0.3s ease-out" }}
       >
         {/* Header with Logo and Close Button */}
@@ -111,7 +119,6 @@ const MobileNav = ({ isOpen, closeMenu }) => {
             <div className="hidden bg-gradient-to-br from-amber-600 to-amber-700 p-2 rounded-xl items-center justify-center">
               <span className="text-white font-bold">O</span>
             </div>
-           
           </div>
           <button
             onClick={closeMenu}
@@ -202,8 +209,6 @@ const MobileNav = ({ isOpen, closeMenu }) => {
             })}
           </div>
         </div>
-
-       
 
         {/* Social Links */}
         <div className="p-6 pt-0 border-t border-gray-100 mt-4">
