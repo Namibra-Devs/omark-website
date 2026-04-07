@@ -450,15 +450,24 @@ const AdminDashboard = () => {
     }
   };
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case "events":
-        return (
-          <div>
-            <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-              <h2 className="text-2xl font-bold text-[#14141D]">
-                Manage Events
-              </h2>
+
+const renderContent = () => {
+  switch (activeTab) {
+    case "events":
+      return (
+        <div>
+          <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <h2 className="text-2xl font-bold text-[#14141D]">
+              Manage Events
+            </h2>
+            <div className="flex gap-3">
+              <button
+                onClick={() => navigate("/all-events")}
+                className="flex items-center gap-2 bg-[#14141D] hover:bg-[#2a2a3c] text-white px-5 py-2.5 rounded-md cursor-pointer transition-all shadow-md hover:shadow-lg"
+              >
+                <Eye size={18} />
+                View All Events
+              </button>
               <button
                 onClick={() => openModal("events")}
                 className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-5 py-2.5 rounded-md cursor-pointer transition-all shadow-md hover:shadow-lg"
@@ -467,276 +476,277 @@ const AdminDashboard = () => {
                 Create Event
               </button>
             </div>
-
-            <div className="space-y-6">
-              {filteredEvents.map((event) => (
-                <div
-                  key={event.id}
-                  className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow"
-                >
-                  <div className="p-6">
-                    <div className="flex flex-wrap justify-between items-start gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2 flex-wrap">
-                          <h3 className="text-xl font-bold text-[#14141D]">
-                            {event.title}
-                          </h3>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeColor(event.status)}`}
-                          >
-                            {event.status}
-                          </span>
-                        </div>
-                        <p className="text-gray-600 text-sm mb-3">
-                          {event.description}
-                        </p>
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <Calendar size={14} />
-                            {event.date}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock size={14} />
-                            {event.time}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin size={14} />
-                            {event.location}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Users size={14} />
-                            {event.registrations.length} registered
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => openModal("events", event)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                        >
-                          <Edit size={18} />
-                        </button>
-                        <button
-                          onClick={() => deleteItem("events", event.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </div>
-
-                    {event.registrations.length > 0 && (
-                      <div className="mt-4 pt-4 border-t border-gray-100">
-                        <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
-                          <h4 className="font-semibold text-[#14141D] flex items-center gap-2">
-                            <Users size={16} />
-                            Registered Attendees ({event.registrations.length})
-                          </h4>
-                          <button
-                            onClick={() => exportRegistrations(event)}
-                            className="flex items-center gap-1 text-sm text-red-600 hover:text-green-700 cursor-pointer transition"
-                          >
-                            <Download size={14} />
-                            Export CSV
-                          </button>
-                        </div>
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-sm">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th className="px-4 py-2 text-left">Name</th>
-                                <th className="px-4 py-2 text-left">Email</th>
-                                <th className="px-4 py-2 text-left">Phone</th>
-                                <th className="px-4 py-2 text-left">Guests</th>
-                                <th className="px-4 py-2 text-left">
-                                  Registered
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {event.registrations.map((reg) => (
-                                <tr
-                                  key={reg.id}
-                                  className="border-b border-gray-100"
-                                >
-                                  <td className="px-4 py-2">{reg.name}</td>
-                                  <td className="px-4 py-2">{reg.email}</td>
-                                  <td className="px-4 py-2">{reg.phone}</td>
-                                  <td className="px-4 py-2">{reg.guests}</td>
-                                  <td className="px-4 py-2">
-                                    {reg.registeredAt}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
-        );
 
-      case "projects":
-        return (
-          <div>
-            <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-              <h2 className="text-2xl font-bold text-[#14141D]">
-                Manage Projects
-              </h2>
-              <button
-                onClick={() => openModal("projects")}
-                className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-5 py-2.5 rounded-md cursor-pointer transition-all shadow-md hover:shadow-lg"
+          <div className="space-y-6">
+            {filteredEvents.map((event) => (
+              <div
+                key={event.id}
+                className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow"
               >
-                <Plus size={18} />
-                Add Project
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProjects.map((project) => (
-                <div
-                  key={project.id}
-                  className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden group hover:shadow-xl transition-all"
-                >
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={project.image}
-                      alt={project.title}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                    />
-                    <div className="absolute top-2 right-2 flex gap-1">
-                      <button
-                        onClick={() => openModal("projects", project)}
-                        className="p-1.5 bg-white/90 rounded-lg hover:bg-blue-500 hover:text-white transition"
-                      >
-                        <Edit size={14} />
-                      </button>
-                      <button
-                        onClick={() => deleteItem("projects", project.id)}
-                        className="p-1.5 bg-white/90 rounded-lg hover:bg-red-500 hover:text-white transition"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                    <div className="absolute bottom-2 left-2">
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${getStatusBadgeColor(project.status)}`}
-                      >
-                        {project.status}
-                      </span>
-                    </div>
-                    {project.status === "Ongoing" && (
-                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200">
-                        <div
-                          className="h-full bg-red-500 transition-all"
-                          style={{ width: project.completion }}
-                        ></div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-[#14141D] mb-1">
-                      {project.title}
-                    </h3>
-                    <p className="text-gray-500 text-xs mb-2 flex items-center gap-1">
-                      <MapPin size={10} />
-                      {project.location}
-                    </p>
-                    <p className="text-gray-600 text-xs mb-3 line-clamp-2">
-                      {project.description}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <div className="flex gap-2 text-xs text-gray-500">
-                        <span>{project.units}</span>
-                        <span>•</span>
-                        <span>{project.size}</span>
-                      </div>
-                      <span className="text-xs text-red-600 font-semibold">
-                        {project.completion}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-
-      case "gallery":
-        return (
-          <div>
-            <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-              <h2 className="text-2xl font-bold text-[#14141D]">
-                Gallery Management
-              </h2>
-              <button
-                onClick={() => openModal("gallery")}
-                className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-5 py-2.5 rounded-md cursor-pointer transition-all shadow-md hover:shadow-lg"
-              >
-                <Plus size={18} />
-                Add Image
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredGallery.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-lg transition-all"
-                >
-                  <div className="relative h-48">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                    />
-                    <div className="absolute top-2 right-2 flex gap-1">
-                      <button
-                        onClick={() => openModal("gallery", item)}
-                        className="p-1.5 bg-white/90 rounded-lg hover:bg-blue-500 hover:text-white transition"
-                      >
-                        <Edit size={14} />
-                      </button>
-                      <button
-                        onClick={() => deleteItem("gallery", item.id)}
-                        className="p-1.5 bg-white/90 rounded-lg hover:bg-red-500 hover:text-white transition"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                    <div className="absolute bottom-2 left-2">
-                      <span className="text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">
-                        {item.category}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-3">
-                    <h4 className="font-semibold text-sm line-clamp-1">
-                      {item.title}
-                    </h4>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {item.tags?.slice(0, 2).map((tag) => (
-                        <span key={tag} className="text-xs text-gray-500">
-                          #{tag}
+                <div className="p-6">
+                  <div className="flex flex-wrap justify-between items-start gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
+                        <h3 className="text-xl font-bold text-[#14141D]">
+                          {event.title}
+                        </h3>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeColor(event.status)}`}
+                        >
+                          {event.status}
                         </span>
-                      ))}
+                      </div>
+                      <p className="text-gray-600 text-sm mb-3">
+                        {event.description}
+                      </p>
+                      <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                        <div className="flex items-center gap-1">
+                          <Calendar size={14} />
+                          {event.date}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock size={14} />
+                          {event.time}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <MapPin size={14} />
+                          {event.location}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users size={14} />
+                          {event.registrations.length} registered
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-gray-400 mt-1">{item.date}</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => openModal("events", event)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition cursor-pointer"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        onClick={() => deleteItem("events", event.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {event.registrations.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
+                        <h4 className="font-semibold text-[#14141D] flex items-center gap-2">
+                          <Users size={16} />
+                          Registered Attendees ({event.registrations.length})
+                        </h4>
+                        <button
+                          onClick={() => exportRegistrations(event)}
+                          className="flex items-center gap-1 text-sm text-red-600 hover:text-red-700 cursor-pointer transition"
+                        >
+                          <Download size={14} />
+                          Export CSV
+                        </button>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-4 py-2 text-left">Name</th>
+                              <th className="px-4 py-2 text-left">Email</th>
+                              <th className="px-4 py-2 text-left">Phone</th>
+                              <th className="px-4 py-2 text-left">Guests</th>
+                              <th className="px-4 py-2 text-left">
+                                Registered
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {event.registrations.map((reg) => (
+                              <tr
+                                key={reg.id}
+                                className="border-b border-gray-100"
+                              >
+                                <td className="px-4 py-2">{reg.name}</td>
+                                <td className="px-4 py-2">{reg.email}</td>
+                                <td className="px-4 py-2">{reg.phone}</td>
+                                <td className="px-4 py-2">{reg.guests}</td>
+                                <td className="px-4 py-2">
+                                  {reg.registeredAt}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "projects":
+      return (
+        <div>
+          <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <h2 className="text-2xl font-bold text-[#14141D]">
+              Manage Projects
+            </h2>
+            <button
+              onClick={() => openModal("projects")}
+              className="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-5 py-2.5 rounded-md cursor-pointer transition-all shadow-md hover:shadow-lg"
+            >
+              <Plus size={18} />
+              Add Project
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProjects.map((project) => (
+              <div
+                key={project.id}
+                className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden group hover:shadow-xl transition-all"
+              >
+                <div className="relative h-48 overflow-hidden">
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute top-2 right-2 flex gap-1">
+                    <button
+                      onClick={() => openModal("projects", project)}
+                      className="p-1.5 bg-white/90 rounded-lg hover:bg-blue-500 hover:text-white transition"
+                    >
+                      <Edit size={14} />
+                    </button>
+                    <button
+                      onClick={() => deleteItem("projects", project.id)}
+                      className="p-1.5 bg-white/90 rounded-lg hover:bg-red-500 hover:text-white transition"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                  <div className="absolute bottom-2 left-2">
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${getStatusBadgeColor(project.status)}`}
+                    >
+                      {project.status}
+                    </span>
+                  </div>
+                  {project.status === "Ongoing" && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200">
+                      <div
+                        className="h-full bg-amber-500 transition-all"
+                        style={{ width: project.completion }}
+                      ></div>
+                    </div>
+                  )}
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-[#14141D] mb-1">
+                    {project.title}
+                  </h3>
+                  <p className="text-gray-500 text-xs mb-2 flex items-center gap-1">
+                    <MapPin size={10} />
+                    {project.location}
+                  </p>
+                  <p className="text-gray-600 text-xs mb-3 line-clamp-2">
+                    {project.description}
+                  </p>
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-2 text-xs text-gray-500">
+                      <span>{project.units}</span>
+                      <span>•</span>
+                      <span>{project.size}</span>
+                    </div>
+                    <span className="text-xs text-amber-600 font-semibold">
+                      {project.completion}
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-        );
+        </div>
+      );
 
-      default:
-        return null;
-    }
-  };
+    case "gallery":
+      return (
+        <div>
+          <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+            <h2 className="text-2xl font-bold text-[#14141D]">
+              Gallery Management
+            </h2>
+            <button
+              onClick={() => openModal("gallery")}
+              className="flex items-center gap-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-5 py-2.5 rounded-md cursor-pointer transition-all shadow-md hover:shadow-lg"
+            >
+              <Plus size={18} />
+              Add Image
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredGallery.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-lg transition-all"
+              >
+                <div className="relative h-48">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute top-2 right-2 flex gap-1">
+                    <button
+                      onClick={() => openModal("gallery", item)}
+                      className="p-1.5 bg-white/90 rounded-lg hover:bg-blue-500 hover:text-white transition"
+                    >
+                      <Edit size={14} />
+                    </button>
+                    <button
+                      onClick={() => deleteItem("gallery", item.id)}
+                      className="p-1.5 bg-white/90 rounded-lg hover:bg-red-500 hover:text-white transition"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                  <div className="absolute bottom-2 left-2">
+                    <span className="text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">
+                      {item.category}
+                    </span>
+                  </div>
+                </div>
+                <div className="p-3">
+                  <h4 className="font-semibold text-sm line-clamp-1">
+                    {item.title}
+                  </h4>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {item.tags?.slice(0, 2).map((tag) => (
+                      <span key={tag} className="text-xs text-gray-500">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-1">{item.date}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+    default:
+      return null;
+  }
+};
 
   const sidebarItems = [
     { id: "events", label: "Events", icon: Calendar, color: "text-red-500" },
