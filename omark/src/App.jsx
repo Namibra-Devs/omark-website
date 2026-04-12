@@ -15,6 +15,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminAuth from './pages/AdminAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 import AllEventsPage from './pages/AllEventsPage';
+import NewsCareerPage from './pages/NewsCareerPage';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/signup" element={<AdminAuth />} />
         <Route path="/admin-auth" element={<AdminAuth />} />
         <Route path="/all-events" element={<AllEventsPage />} />
+        
         
         {/* Protected Admin Route - No Navbar/Footer */}
         <Route 
@@ -93,6 +95,15 @@ function App() {
             <Navbar />
             <main className="flex-grow">
               <GalleryPage />
+            </main>
+            <Footer />
+          </div>
+        } />
+        <Route path="/news-career" element={
+          <div className="min-h-screen bg-white flex flex-col">
+            <Navbar />
+            <main className="flex-grow">
+              <NewsCareerPage />
             </main>
             <Footer />
           </div>

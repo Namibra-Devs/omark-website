@@ -18,6 +18,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import VideoBanner from '@/components/VideoBanner';
+import FAQSection from '@/components/FAQSection';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -513,6 +514,8 @@ const ContactPage = () => {
 
         
       </div>
+
+      <FAQSection />
 <VideoBanner/>
 
       <style jsx>{`

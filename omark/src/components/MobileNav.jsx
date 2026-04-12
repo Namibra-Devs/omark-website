@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Calendar,
   Image,
+  Briefcase
 } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -77,7 +78,7 @@ const MobileNav = ({ isOpen, closeMenu }) => {
   icon: Image,
   description: "Explore our visuals",
 },
-
+ { path: '/news-career', label: 'Career', icon: Briefcase, description: 'Updates & jobs' },
 
     {
       path: "/contact",

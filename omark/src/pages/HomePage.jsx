@@ -7,6 +7,8 @@ import ServiceCard from '../components/ServiceCard';
 import ProjectsSlider from '../components/ProjectsSlider';
 import EventSection from '../components/EventSection';
 import ContactSection from '../components/ContactSection';
+import FAQSection from '../components/FAQSection';
+import TestimonialsSection from '../components/TestimonialsSection';
 
 const HomePage = () => {
   const services = [
@@ -56,6 +58,8 @@ const HomePage = () => {
       {/* Event Section */}
 <EventSection />
 
+<FAQSection />
+<TestimonialsSection />
 
      {/* Contact Section with Portrait Video */}
       <ContactSection />

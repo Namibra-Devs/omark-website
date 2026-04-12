@@ -1,7 +1,7 @@
 // components/DesktopNav.jsx - Updated with correct color classes
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Info, FolderGit2, Mail, Calendar, Image } from 'lucide-react';
+import { Home, Info, FolderGit2, Mail, Calendar, Image, Briefcase } from 'lucide-react';
 
 const DesktopNav = () => {
   const navLinks = [
@@ -10,6 +10,7 @@ const DesktopNav = () => {
     { path: '/projects', label: 'Projects', icon: FolderGit2 },
     { path: '/events', label: 'Events', icon: Calendar },
     { path: '/gallery', label: 'Gallery', icon: Image },
+    { path: '/news-career', label: 'Careers', icon: Briefcase },
     { path: '/contact', label: 'Contact', icon: Mail },
   ];
 
