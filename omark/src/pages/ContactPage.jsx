@@ -81,7 +81,7 @@ const ContactPage = () => {
       location: "Pankrono Office",
       address: "Pankrono Main Road",
       city: "Kumasi, Ashanti Region",
-      phone: "+233 24 123 4567",
+      phone: "+233 54 602 9075 ",
       email: "pankrono@omarkrealestate.com",
       hours: "Mon-Fri: 8AM - 6PM, Sat: 9AM - 2PM",
       mapLink: "#"
@@ -90,7 +90,7 @@ const ContactPage = () => {
       location: "Atimatim Office",
       address: "Atimatim Junction",
       city: "Kumasi, Ashanti Region",
-      phone: "+233 24 765 4321",
+      phone: "+233 24 385 1815",
       email: "atimatim@omarkrealestate.com",
       hours: "Mon-Fri: 8AM - 6PM, Sat: 9AM - 2PM",
       mapLink: "#"
@@ -234,7 +234,7 @@ const ContactPage = () => {
                 <div className="flex items-center gap-3">
                   <Phone size={16} className="text-red-600" />
                   <a href="tel:+233241234567" className="text-gray-700 hover:text-red-600 transition">
-                    +233 24 123 4567
+                    +233 54 602 9075
                   </a>
                 </div>
                 <div className="flex items-center gap-3">
@@ -259,7 +259,7 @@ const ContactPage = () => {
               <h3 className="text-white font-semibold mb-2">Emergency Support</h3>
               <p className="text-gray-400 text-sm mb-3">24/7 emergency assistance for existing clients</p>
               <a 
-                href="tel:+233241234567" 
+                href="tel:+233546029075" 
                 className="inline-flex items-center gap-2 text-red-500 hover:text-white font-semibold hover:gap-3 transition-all"
               >
                 Call Emergency Line

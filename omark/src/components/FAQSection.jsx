@@ -189,7 +189,7 @@ const FAQSection = () => {
                 Contact Us
               </Link>
               <a
-                href="tel:+233241234567"
+                href="tel:+233546029075"
                 className="border-2 border-red-600 text-red-600 hover:bg-red-800 hover:text-white px-6 py-2 rounded-md font-semibold transition"
               >
                 Call Now

@@ -11,7 +11,7 @@ const Stats = () => {
 
   // 👉 WhatsApp CTA function
   const handleBookVisit = () => {
-    const phoneNumber = '233241234567'; // replace with your number (no +)
+    const phoneNumber = '233546029075'; // replace with your number (no +)
     const message = encodeURIComponent(
       'Hello, I would like to book a free site visit. Please share available dates.'
     );

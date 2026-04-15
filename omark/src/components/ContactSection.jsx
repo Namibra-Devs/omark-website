@@ -48,7 +48,7 @@ const ContactSection = () => {
   };
 
   const contactInfo = [
-    { icon: Phone, title: 'Phone', details: ['+233 24 123 4567', '+233 24 765 4321'], link: 'tel:+233241234567' },
+    { icon: Phone, title: 'Phone', details: ['+233 54 602 9075', '+233 24 385 1815'], link: 'tel:+233546029075' },
     { icon: Mail, title: 'Email', details: ['info@omarkrealestate.com', 'sales@omarkrealestate.com'], link: 'mailto:info@omarkrealestate.com' },
     { icon: MapPin, title: 'Office Locations', details: ['Pankrono Main Road, Kumasi', 'Atimatim Junction, Kumasi'], link: null },
     { icon: Clock, title: 'Working Hours', details: ['Mon-Fri: 8:00 AM - 6:00 PM', 'Saturday: 9:00 AM - 2:00 PM'], link: null },

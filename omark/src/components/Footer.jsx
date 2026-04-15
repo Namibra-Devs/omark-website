@@ -42,7 +42,7 @@ const Footer = () => {
       text: "Pankrono Main Road & Atimatim Junction, Kumasi, Ghana",
       link: null,
     },
-    { icon: Phone, text: "+233 24 123 4567", link: "tel:+233241234567" },
+    { icon: Phone, text: "+233 54 602 9075", link: "tel:+233546029075" },
     {
       icon: Mail,
       text: "info@omarkrealestate.com",
