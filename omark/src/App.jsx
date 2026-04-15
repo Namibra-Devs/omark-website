@@ -15,7 +15,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminAuth from './pages/AdminAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 import AllEventsPage from './pages/AllEventsPage';
-import NewsCareerPage from './pages/NewsCareerPage';
+import NewsPage from './pages/NewsPage';
+import CareerPage from './pages/CareerPage';
 
 function App() {
   return (
@@ -99,11 +100,22 @@ function App() {
             <Footer />
           </div>
         } />
-        <Route path="/news-career" element={
+        {/* News & Career Routes */}
+        <Route path="/news" element={
           <div className="min-h-screen bg-white flex flex-col">
             <Navbar />
             <main className="flex-grow">
-              <NewsCareerPage />
+              <NewsPage />
+            </main>
+            <Footer />
+          </div>
+        } />
+        
+        <Route path="/career" element={
+          <div className="min-h-screen bg-white flex flex-col">
+            <Navbar />
+            <main className="flex-grow">
+              <CareerPage />
             </main>
             <Footer />
           </div>
