@@ -1,24 +1,124 @@
 // pages/NewsPage.jsx - Separate News & Updates Page
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Calendar, 
-  User, 
-  ArrowRight, 
-  Search, 
-  Filter, 
-  ChevronDown, 
-  Clock, 
-  Eye, 
+import { useNews, useLikeArticle } from '../hooks/useNews';
+import { useSubscribeNewsletter } from '../hooks/useNewsletter';
+import {
+  Calendar,
+  User,
+  ArrowRight,
+  Search,
+  Filter,
+  ChevronDown,
+  Clock,
+  Eye,
   Heart,
   Mail,
   Send,
   CheckCircle,
   Tag,
-  Share2
+  Share2,
+  Loader2
 } from 'lucide-react';
 import VideoBanner from '@/components/VideoBanner';
+
+const STATIC_NEWS = [
+  {
+    id: 1,
+    title: 'Omark Real Estate Wins Best Developer Award 2024',
+    excerpt: 'We are proud to announce that Omark Real Estate has been recognized as the Best Real Estate Developer at the Ghana Property Awards 2024 for excellence in residential development and innovation in affordable housing.',
+    category: 'Awards',
+    image: '/images/award.png',
+    date: 'March 15, 2025',
+    author: 'Admin',
+    readTime: '3 min read',
+    views: 1245,
+    featured: true
+  },
+  {
+    id: 2,
+    title: 'Pankrono Gardens Phase 2 Launch Announced',
+    excerpt: 'Due to high demand, we are excited to announce the launch of Phase 2 at Pankrono Gardens with 30 additional luxury homes featuring smart technology and modern amenities.',
+    category: 'Projects',
+    image: '/images/hero1.jpeg',
+    date: 'March 10, 2025',
+    author: 'Admin',
+    readTime: '2 min read',
+    views: 892,
+    featured: false
+  },
+  {
+    id: 3,
+    title: 'Affordable Housing Initiative: 500 New Homes',
+    excerpt: 'Omark partners with government to deliver 500 affordable homes for low and middle-income families across the Ashanti Region over the next 24 months.',
+    category: 'Company News',
+    image: '/images/bb.jpeg',
+    date: 'March 5, 2025',
+    author: 'Admin',
+    readTime: '4 min read',
+    views: 2100,
+    featured: false
+  },
+  {
+    id: 4,
+    title: 'Sustainable Building Practices at Omark',
+    excerpt: 'Learn how Omark is leading the way in eco-friendly construction with solar-powered homes, rainwater harvesting, and sustainable materials that reduce carbon footprint.',
+    category: 'Industry Insights',
+    image: '/images/bbbbb.png',
+    date: 'February 28, 2025',
+    author: 'Admin',
+    readTime: '5 min read',
+    views: 678,
+    featured: false
+  },
+  {
+    id: 5,
+    title: 'Community Outreach: Building Schools in Rural Areas',
+    excerpt: 'Omark continues its commitment to community development with the construction of three new schools in underserved communities across the Ashanti Region.',
+    category: 'Community',
+    image: '/images/c.png',
+    date: 'February 20, 2025',
+    author: 'Admin',
+    readTime: '3 min read',
+    views: 1543,
+    featured: false
+  },
+  {
+    id: 6,
+    title: 'Real Estate Market Outlook 2025',
+    excerpt: 'Expert insights on Ghana\'s real estate market trends, opportunities, and predictions for the coming year from our industry experts.',
+    category: 'Industry Insights',
+    image: '/images/cc.jpeg',
+    date: 'February 15, 2025',
+    author: 'Admin',
+    readTime: '6 min read',
+    views: 987,
+    featured: false
+  }
+];
+
+const formatDate = (val) => {
+  if (!val) return '';
+  if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
+    return new Date(val).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  return val;
+};
+
+const normalizeArticle = (a) => ({
+  ...a,
+  id: a.id ?? a._id,
+  title: a.title ?? '',
+  excerpt: a.excerpt ?? a.summary ?? a.description ?? '',
+  category: a.category ?? a.tag ?? '',
+  image: a.image ?? a.imageUrl ?? a.thumbnail ?? a.coverImage ?? '',
+  date: formatDate(a.date ?? a.publishedAt ?? a.createdAt ?? ''),
+  author: a.author ?? a.authorName ?? 'Admin',
+  readTime: a.readTime ?? a.readingTime ?? '3 min read',
+  views: a.views ?? a.viewCount ?? 0,
+  featured: a.featured ?? a.isFeatured ?? false,
+});
 
 const NewsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,94 +128,37 @@ const NewsPage = () => {
   const [email, setEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
 
-  const categories = ['all', 'Company News', 'Projects', 'Industry Insights', 'Community', 'Awards'];
+  const { data: newsData } = useNews({ limit: 50 });
+  const likeMutation = useLikeArticle();
+  const subscribeMutation = useSubscribeNewsletter();
 
-  const news = [
-    {
-      id: 1,
-      title: 'Omark Real Estate Wins Best Developer Award 2024',
-      excerpt: 'We are proud to announce that Omark Real Estate has been recognized as the Best Real Estate Developer at the Ghana Property Awards 2024 for excellence in residential development and innovation in affordable housing.',
-      category: 'Awards',
-      image: '/images/award.png',
-      date: 'March 15, 2025',
-      author: 'Admin',
-      readTime: '3 min read',
-      views: 1245,
-      featured: true
-    },
-    {
-      id: 2,
-      title: 'Pankrono Gardens Phase 2 Launch Announced',
-      excerpt: 'Due to high demand, we are excited to announce the launch of Phase 2 at Pankrono Gardens with 30 additional luxury homes featuring smart technology and modern amenities.',
-      category: 'Projects',
-      image: '/images/hero1.jpeg',
-      date: 'March 10, 2025',
-      author: 'Admin',
-      readTime: '2 min read',
-      views: 892,
-      featured: false
-    },
-    {
-      id: 3,
-      title: 'Affordable Housing Initiative: 500 New Homes',
-      excerpt: 'Omark partners with government to deliver 500 affordable homes for low and middle-income families across the Ashanti Region over the next 24 months.',
-      category: 'Company News',
-      image: '/images/bb.jpeg',
-      date: 'March 5, 2025',
-      author: 'Admin',
-      readTime: '4 min read',
-      views: 2100,
-      featured: false
-    },
-    {
-      id: 4,
-      title: 'Sustainable Building Practices at Omark',
-      excerpt: 'Learn how Omark is leading the way in eco-friendly construction with solar-powered homes, rainwater harvesting, and sustainable materials that reduce carbon footprint.',
-      category: 'Industry Insights',
-      image: '/images/bbbbb.png',
-      date: 'February 28, 2025',
-      author: 'Admin',
-      readTime: '5 min read',
-      views: 678,
-      featured: false
-    },
-    {
-      id: 5,
-      title: 'Community Outreach: Building Schools in Rural Areas',
-      excerpt: 'Omark continues its commitment to community development with the construction of three new schools in underserved communities across the Ashanti Region.',
-      category: 'Community',
-      image: '/images/c.png',
-      date: 'February 20, 2025',
-      author: 'Admin',
-      readTime: '3 min read',
-      views: 1543,
-      featured: false
-    },
-    {
-      id: 6,
-      title: 'Real Estate Market Outlook 2025',
-      excerpt: 'Expert insights on Ghana\'s real estate market trends, opportunities, and predictions for the coming year from our industry experts.',
-      category: 'Industry Insights',
-      image: '/images/cc.jpeg',
-      date: 'February 15, 2025',
-      author: 'Admin',
-      readTime: '6 min read',
-      views: 987,
-      featured: false
-    }
-  ];
+  const news = useMemo(() => {
+    const list = Array.isArray(newsData) ? newsData : (newsData?.data ?? null);
+    return list && list.length > 0 ? list.map(normalizeArticle) : STATIC_NEWS;
+  }, [newsData]);
 
-  const handleSubscribe = (e) => {
+  const categories = useMemo(() => {
+    const cats = [...new Set(news.map(n => n.category).filter(Boolean))];
+    return ['all', ...cats];
+  }, [news]);
+
+  const handleSubscribe = async (e) => {
     e.preventDefault();
-    if (email) {
-      setIsSubscribed(true);
-      setTimeout(() => setIsSubscribed(false), 3000);
-      setEmail('');
-    }
+    if (!email) return;
+    try {
+      await subscribeMutation.mutateAsync({ email });
+    } catch (_) {}
+    setIsSubscribed(true);
+    setTimeout(() => setIsSubscribed(false), 3000);
+    setEmail('');
   };
 
   const toggleLike = (id) => {
-    setLikedPosts(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    setLikedPosts(prev => {
+      if (prev.includes(id)) return prev.filter(i => i !== id);
+      likeMutation.mutate(id);
+      return [...prev, id];
+    });
   };
 
   const filteredNews = news.filter(item => {

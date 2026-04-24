@@ -1,5 +1,5 @@
 // pages/GalleryPage.jsx - Premium Gallery Page
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -9,20 +9,46 @@ import {
   ZoomIn,
   Heart,
   Share2,
-  Star,
   Grid,
   LayoutGrid,
   Image as ImageIcon,
-  Video,
   Calendar,
   MapPin,
   ChevronLeft,
   ChevronRight,
   Download,
-  Maximize2,
   ArrowRight,
 } from "lucide-react";
 import Stats from "@/components/Stats";
+import { useGallery, useGalleryCategories } from "../hooks/useGallery";
+
+const STATIC_GALLERY = [
+  { id: 1, title: "Pankrono Gardens - Exterior View", description: "Modern luxury homes with landscaped gardens and smart home technology", category: "Residential", subcategory: "Exterior", image: "/images/hse1.webp", location: "Pankrono, Kumasi", date: "March 2024", tags: ["Luxury", "Modern", "Smart Home"], featured: true },
+  { id: 2, title: "Luxury Villa Interior", description: "Spacious living room with premium finishes and natural lighting", category: "Residential", subcategory: "Interior", image: "/images/house1.jpeg", location: "Heritage Villas, Kumasi", date: "January 2024", tags: ["Interior", "Luxury", "Modern"], featured: true },
+  { id: 3, title: "Modern Kitchen Design", description: "State-of-the-art kitchen with smart appliances and elegant cabinetry", category: "Residential", subcategory: "Interior", image: "/images/hse7.webp", location: "Pankrono Gardens", date: "February 2024", tags: ["Kitchen", "Modern", "Luxury"], featured: false },
+  { id: 4, title: "Master Bedroom Suite", description: "Spacious master bedroom with walk-in closet and en-suite bathroom", category: "Residential", subcategory: "Interior", image: "/images/bed1.webp", location: "Atimatim Heights", date: "December 2023", tags: ["Bedroom", "Luxury", "Modern"], featured: false },
+  { id: 5, title: "Modern House Aerial View", description: "State-of-the-art commercial complex in the heart of Kumasi", category: "Commercial", subcategory: "Exterior", image: "/images/hse6.webp", location: "Central Business District, Kumasi", date: "March 2024", tags: ["Commercial", "Retail", "Modern"], featured: true },
+  { id: 6, title: "Modern Office Space", description: "Contemporary office design with open floor plan and natural light", category: "Commercial", subcategory: "Interior", image: "/images/hse9.webp", location: "Tech Hub Tower", date: "February 2024", tags: ["Office", "Modern", "Commercial"], featured: false },
+  { id: 7, title: "Retail Space Design", description: "Elegant retail environment with premium finishes", category: "Commercial", subcategory: "Interior", image: "/images/hse3.webp", location: "Kumasi Central Mall", date: "January 2024", tags: ["Retail", "Commercial", "Modern"], featured: false },
+  { id: 8, title: "Construction Progress - Atimatim Heights", description: "Aerial view of ongoing construction at Atimatim Heights", category: "Construction", subcategory: "Process", image: "/images/21.jpeg", location: "Atimatim, Kumasi", date: "March 2024", tags: ["Construction", "Progress", "Aerial"], featured: true },
+  { id: 9, title: "Quality Materials", description: "Premium construction materials ensuring durability and safety", category: "Construction", subcategory: "Materials", image: "/images/25.jpeg", location: "Pankrono Gardens", date: "February 2024", tags: ["Materials", "Quality", "Construction"], featured: false },
+  { id: 10, title: "Expert Craftsmanship", description: "Skilled workers demonstrating precision and expertise", category: "Construction", subcategory: "Team", image: "/images/house2.webp", location: "Various Sites", date: "January 2024", tags: ["Team", "Craftsmanship", "Construction"], featured: false },
+  { id: 11, title: "Grand Opening Celebration", description: "Community gathering at the launch of Pankrono Gardens", category: "Events", subcategory: "Ceremony", image: "/images/event1.jpeg", location: "Pankrono Gardens", date: "March 2024", tags: ["Event", "Community", "Celebration"], featured: true },
+  { id: 12, title: "Homeownership Seminar", description: "Educational event for first-time homebuyers", category: "Events", subcategory: "Seminar", image: "/images/1.jpeg", location: "Omark Head Office", date: "February 2024", tags: ["Seminar", "Education", "Community"], featured: false },
+];
+
+const normalizeGalleryItem = (item) => ({
+  id: item.id,
+  title: item.title ?? item.name ?? '',
+  description: item.description ?? '',
+  category: item.category ?? 'Uncategorized',
+  subcategory: item.subcategory ?? 'General',
+  image: item.image ?? item.imageUrl ?? item.url ?? item.thumbnail ?? '',
+  location: item.location ?? '',
+  date: item.date ?? (item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : ''),
+  tags: Array.isArray(item.tags) ? item.tags : [],
+  featured: item.featured ?? item.isFeatured ?? false,
+});
 
 const GalleryPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,182 +59,19 @@ const GalleryPage = () => {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [likedImages, setLikedImages] = useState([]);
 
-  const galleryItems = [
-    // Residential Projects
-    {
-      id: 1,
-      title: "Pankrono Gardens - Exterior View",
-      description:
-        "Modern luxury homes with landscaped gardens and smart home technology",
-      category: "Residential",
-      subcategory: "Exterior",
-      image: "/images/hse1.webp",
-      thumbnail: "/images/gallery/residential-1-thumb.jpg",
-      location: "Pankrono, Kumasi",
-      date: "March 2024",
-      tags: ["Luxury", "Modern", "Smart Home"],
-      featured: true,
-    },
-    {
-      id: 2,
-      title: "Luxury Villa Interior",
-      description:
-        "Spacious living room with premium finishes and natural lighting",
-      category: "Residential",
-      subcategory: "Interior",
-      image: "/images//house1.jpeg",
-      thumbnail: "/images/gallery/residential-2-thumb.jpg",
-      location: "Heritage Villas, Kumasi",
-      date: "January 2024",
-      tags: ["Interior", "Luxury", "Modern"],
-      featured: true,
-    },
-    {
-      id: 3,
-      title: "Modern Kitchen Design",
-      description:
-        "State-of-the-art kitchen with smart appliances and elegant cabinetry",
-      category: "Residential",
-      subcategory: "Interior",
-      image: "/images/hse7.webp",
-      thumbnail: "/images/hse3.webp",
-      location: "Pankrono Gardens",
-      date: "February 2024",
-      tags: ["Kitchen", "Modern", "Luxury"],
-      featured: false,
-    },
-    {
-      id: 4,
-      title: "Master Bedroom Suite",
-      description:
-        "Spacious master bedroom with walk-in closet and en-suite bathroom",
-      category: "Residential",
-      subcategory: "Interior",
-      image: "/images/bed1.webp",
-      thumbnail: "/images/gallery/residential-4-thumb.jpg",
-      location: "Atimatim Heights",
-      date: "December 2023",
-      tags: ["Bedroom", "Luxury", "Modern"],
-      featured: false,
-    },
-    // Commercial Projects
-    {
-      id: 5,
-      title: "Modern House Aerial View",
-      description: "State-of-the-art commercial complex in the heart of Kumasi",
-      category: "Commercial",
-      subcategory: "Exterior",
-      image: "/images/hse6.webp",
-      thumbnail: "/images/gallery/commercial-1-thumb.jpg",
-      location: "Central Business District, Kumasi",
-      date: "March 2024",
-      tags: ["Commercial", "Retail", "Modern"],
-      featured: true,
-    },
-    {
-      id: 6,
-      title: "Modern Office Space",
-      description:
-        "Contemporary office design with open floor plan and natural light",
-      category: "Commercial",
-      subcategory: "Interior",
-      image: "/images/hse9.webp",
-      thumbnail: "/images/gallery/commercial-2-thumb.jpg",
-      location: "Tech Hub Tower",
-      date: "February 2024",
-      tags: ["Office", "Modern", "Commercial"],
-      featured: false,
-    },
-    {
-      id: 7,
-      title: "Retail Space Design",
-      description: "Elegant retail environment with premium finishes",
-      category: "Commercial",
-      subcategory: "Interior",
-      image: "/images/hse3.webp",
-      thumbnail: "/images/gallery/commercial-3-thumb.jpg",
-      location: "Kumasi Central Mall",
-      date: "January 2024",
-      tags: ["Retail", "Commercial", "Modern"],
-      featured: false,
-    },
-    // Construction Process
-    {
-      id: 8,
-      title: "Construction Progress - Atimatim Heights",
-      description: "Aerial view of ongoing construction at Atimatim Heights",
-      category: "Construction",
-      subcategory: "Process",
-      image: "/images/21.jpeg",
-      thumbnail: "/images/gallery/construction-1-thumb.jpg",
-      location: "Atimatim, Kumasi",
-      date: "March 2024",
-      tags: ["Construction", "Progress", "Aerial"],
-      featured: true,
-    },
-    {
-      id: 9,
-      title: "Quality Materials",
-      description:
-        "Premium construction materials ensuring durability and safety",
-      category: "Construction",
-      subcategory: "Materials",
-      image: "/images/25.jpeg",
-      thumbnail: "/images/gallery/construction-2-thumb.jpg",
-      location: "Pankrono Gardens",
-      date: "February 2024",
-      tags: ["Materials", "Quality", "Construction"],
-      featured: false,
-    },
-    {
-      id: 10,
-      title: "Expert Craftsmanship",
-      description: "Skilled workers demonstrating precision and expertise",
-      category: "Construction",
-      subcategory: "Team",
-      image: "/images/house2.webp",
-      thumbnail: "/images/gallery/construction-3-thumb.jpg",
-      location: "Various Sites",
-      date: "January 2024",
-      tags: ["Team", "Craftsmanship", "Construction"],
-      featured: false,
-    },
-    // Community Events
-    {
-      id: 11,
-      title: "Grand Opening Celebration",
-      description: "Community gathering at the launch of Pankrono Gardens",
-      category: "Events",
-      subcategory: "Ceremony",
-      image: "/images/event1.jpeg",
-      thumbnail: "/images/gallery/event-1-thumb.jpg",
-      location: "Pankrono Gardens",
-      date: "March 2024",
-      tags: ["Event", "Community", "Celebration"],
-      featured: true,
-    },
-    {
-      id: 12,
-      title: "Homeownership Seminar",
-      description: "Educational event for first-time homebuyers",
-      category: "Events",
-      subcategory: "Seminar",
-      image: "/images/1.jpeg",
-      thumbnail: "/images/gallery/event-2-thumb.jpg",
-      location: "Omark Head Office",
-      date: "February 2024",
-      tags: ["Seminar", "Education", "Community"],
-      featured: false,
-    },
-  ];
+  const { data: galleryData } = useGallery({ limit: 100 });
+  const { data: categoryData } = useGalleryCategories();
 
-  const categories = [
-    "all",
-    "Residential",
-    "Commercial",
-    "Construction",
-    "Events",
-  ];
+  const galleryItems = (() => {
+    const list = Array.isArray(galleryData) ? galleryData : (galleryData?.data ?? null);
+    if (list && list.length > 0) return list.map(normalizeGalleryItem);
+    return STATIC_GALLERY;
+  })();
+
+  const apiCategories = Array.isArray(categoryData) ? categoryData : [];
+  const derivedCategories = Array.from(new Set(galleryItems.map((i) => i.category).filter(Boolean)));
+  const categories = ["all", ...(apiCategories.length > 0 ? apiCategories : derivedCategories)];
+
   const subcategories = {
     all: [],
     Residential: ["All", "Exterior", "Interior"],
@@ -219,23 +82,26 @@ const GalleryPage = () => {
 
   const [selectedSubcategory, setSelectedSubcategory] = useState("All");
 
+  useEffect(() => {
+    document.body.style.overflow = isLightboxOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isLightboxOpen]);
+
   const filteredItems = useMemo(() => {
     return galleryItems.filter((item) => {
       const matchesSearch =
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.tags.some((tag) =>
+        (item.title ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.description ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.tags ?? []).some((tag) =>
           tag.toLowerCase().includes(searchTerm.toLowerCase()),
         );
       const matchesCategory =
         selectedCategory === "all" || item.category === selectedCategory;
       const matchesSubcategory =
-        selectedSubcategory === "All" ||
-        (selectedSubcategory !== "All" &&
-          item.subcategory === selectedSubcategory);
+        selectedSubcategory === "All" || item.subcategory === selectedSubcategory;
       return matchesSearch && matchesCategory && matchesSubcategory;
     });
-  }, [searchTerm, selectedCategory, selectedSubcategory]);
+  }, [searchTerm, selectedCategory, selectedSubcategory, galleryItems]);
 
   const featuredItems = galleryItems.filter((item) => item.featured);
 
@@ -248,13 +114,11 @@ const GalleryPage = () => {
   const openLightbox = (item) => {
     setSelectedImage(item);
     setIsLightboxOpen(true);
-    document.body.style.overflow = "hidden";
   };
 
   const closeLightbox = () => {
     setIsLightboxOpen(false);
     setSelectedImage(null);
-    document.body.style.overflow = "unset";
   };
 
   const nextImage = () => {
@@ -570,7 +434,7 @@ const GalleryPage = () => {
                   : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
               }`}
             >
-              {filteredItems.map((item, idx) => (
+              {filteredItems.map((item) => (
                 <motion.div
                   key={item.id}
                   variants={fadeInUp}

@@ -1,6 +1,7 @@
 // pages/EventDetailPage.jsx - Individual Event Page (Optional)
 import React from "react";
 import { useParams, Link } from "react-router-dom";
+import { useEvent } from "../hooks/useEvents";
 import {
   Calendar,
   MapPin,
@@ -9,39 +10,42 @@ import {
   Share2,
   Download,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
+
+const formatDate = (val) => {
+  if (!val) return '';
+  if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
+    return new Date(val).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  return val;
+};
 
 const EventDetailPage = () => {
   const { id } = useParams();
+  const { data: apiEvent, isLoading } = useEvent(id);
 
-  // In a real app, fetch event data based on id
+  if (isLoading) {
+    return (
+      <section className="pt-32 pb-20 bg-gray-50 min-h-screen flex items-center justify-center">
+        <Loader2 size={40} className="animate-spin text-red-600" />
+      </section>
+    );
+  }
+
+  const raw = apiEvent ?? {};
   const event = {
-    id: parseInt(id),
-    title: "Grand Opening: Pankrono Gardens",
-    description:
-      "Join us for the official launch of our premium residential community. Tour model homes, meet the architects, and enjoy exclusive opening discounts.",
-    fullDescription: `This landmark event marks the completion of Pankrono Gardens, our flagship residential community in Kumasi. The grand opening celebration will feature:
-
-• Guided tours of model homes
-• Meet-and-greet with lead architects
-• Exclusive opening discounts and payment plans
-• Refreshments and entertainment
-• Q&A session with the development team
-
-Don't miss this opportunity to secure your dream home at special launch prices. Space is limited, so register early to guarantee your spot.`,
-    date: "April 25, 2025",
-    time: "10:00 AM - 4:00 PM",
-    location: "Pankrono Gardens Estate, Kumasi",
-    image: "/images/event1.jpg",
-    category: "Open House",
-    status: "Upcoming",
-    agenda: [
-      { time: "10:00 AM", activity: "Welcome Address & Opening Ceremony" },
-      { time: "11:00 AM", activity: "Guided Property Tours" },
-      { time: "1:00 PM", activity: "Lunch Break" },
-      { time: "2:00 PM", activity: "Architect Q&A Session" },
-      { time: "3:00 PM", activity: "Exclusive Offers & Registration" },
-    ],
+    id: raw.id ?? raw._id ?? id,
+    title: raw.title ?? "Event Details",
+    description: raw.description ?? raw.summary ?? "",
+    fullDescription: raw.fullDescription ?? raw.description ?? raw.summary ?? "",
+    date: formatDate(raw.date ?? raw.startDate ?? raw.eventDate ?? ""),
+    time: raw.time ?? raw.startTime ?? "",
+    location: raw.location ?? raw.venue ?? raw.address ?? "",
+    image: raw.image ?? raw.imageUrl ?? raw.thumbnail ?? "/images/event1.jpg",
+    category: raw.category ?? raw.type ?? "",
+    status: raw.status ?? "Upcoming",
+    agenda: Array.isArray(raw.agenda) ? raw.agenda : [],
   };
 
   return (

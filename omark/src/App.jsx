@@ -17,6 +17,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AllEventsPage from './pages/AllEventsPage';
 import NewsPage from './pages/NewsPage';
 import CareerPage from './pages/CareerPage';
+import ApiDocs from './pages/ApiDocs';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/signup" element={<AdminAuth />} />
         <Route path="/admin-auth" element={<AdminAuth />} />
         <Route path="/all-events" element={<AllEventsPage />} />
+        <Route path="/api-docs" element={<ApiDocs />} />
         
         
         {/* Protected Admin Route - No Navbar/Footer */}

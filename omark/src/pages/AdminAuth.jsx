@@ -11,17 +11,13 @@ import {
   Phone,
   ArrowRight,
   Home,
-  Shield,
   Building2,
-  Sparkles,
   CheckCircle,
   X,
   AlertCircle,
-  HardHat,
-  MapPin,
-  Clock,
   Users,
 } from "lucide-react";
+import { authApi } from "../api/auth";
 
 const AdminAuth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -49,23 +45,6 @@ const AdminAuth = () => {
 
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
 
   // Validation functions
   const validateLogin = () => {
@@ -120,85 +99,48 @@ const AdminAuth = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-
     if (!validateLogin()) return;
 
     setLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      // Admin credentials check for Omark
-      if (
-        loginData.email === "admin@omarkrealestate.com" &&
-        loginData.password === "OmarkAdmin2024"
-      ) {
-        setSuccess("Login successful! Redirecting to dashboard...");
-
-        // Store admin session
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            name: "Admin User",
-            email: loginData.email,
-            role: "administrator",
-          }),
-        );
-        localStorage.setItem("admin_role", "administrator");
-
-        if (loginData.rememberMe) {
-          localStorage.setItem("admin_remember", loginData.email);
-        }
-
-        // Set session timestamp
-        localStorage.setItem("admin_session_start", Date.now().toString());
-
-        // Redirect to admin dashboard
-        setTimeout(() => {
-          navigate("/admin");
-        }, 1500);
-      } else {
-        setError(
-          "Invalid email or password. Please use admin@omarkrealestate.com / OmarkAdmin2024",
-        );
+    try {
+      await authApi.login({ email: loginData.email, password: loginData.password });
+      if (loginData.rememberMe) {
+        localStorage.setItem("admin_remember", loginData.email);
       }
+      setSuccess("Login successful! Redirecting to dashboard...");
+      setTimeout(() => navigate("/admin"), 1000);
+    } catch (err) {
+      setError(err?.response?.data?.message ?? "Invalid email or password.");
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
-
     if (!validateSignup()) return;
 
     setLoading(true);
-
-    // Simulate API call for admin account creation
-    setTimeout(() => {
-      setSuccess(
-        "Admin account created successfully! Please check your email to verify.",
-      );
-
-      // Clear form
-      setSignupData({
-        fullName: "",
-        email: "",
-        phone: "",
-        password: "",
-        confirmPassword: "",
-        agreeTerms: false,
+    try {
+      await authApi.register({
+        name: signupData.fullName,
+        email: signupData.email,
+        phone: signupData.phone,
+        password: signupData.password,
       });
-
-      // Switch to login after 2 seconds
+      setSuccess("Admin account created! You can now sign in.");
+      setSignupData({ fullName: "", email: "", phone: "", password: "", confirmPassword: "", agreeTerms: false });
       setTimeout(() => {
         setIsLogin(true);
         setSuccess("");
         setLoginData((prev) => ({ ...prev, email: signupData.email }));
-      }, 1000);
-
+      }, 1500);
+    } catch (err) {
+      setError(err?.response?.data?.message ?? "Registration failed. Please try again.");
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   // Check if already logged in

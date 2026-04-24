@@ -1,117 +1,40 @@
 // components/ProjectsSlider.jsx - Redesigned: Sleek Modern Slider
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, X, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useProjects } from '../hooks/useProjects';
 
-const PROJECTS = [
-  {
-    id: 1,
-    title: 'Pankrono Gardens',
-    location: 'Pankrono, Kumasi',
-    tag: 'Residential',
-    description:
-      'A modern residential community featuring 50 luxury homes with smart home technology, landscaped gardens, and 24/7 security.',
-    stats: { homes: '50 Units', area: '5 Acres', completion: '2024' },
-    mainImage: '/images/6.jpeg',
-    images: [
-      '/images/7.jpeg',
-      '/images/8.jpeg',
-      '/images/9.jpeg',
-      '/images/10.jpeg',
-      '/images/11.jpeg',
-    ],
-    accent: '#7B170F',
-  },
-  {
-    id: 2,
-    title: 'Atimatim Heights',
-    location: 'Atimatim, Kumasi',
-    tag: 'Affordable',
-    description:
-      'Affordable housing project with flexible payment plans, featuring modern 2 & 3 bedroom homes perfect for first-time homeowners.',
-    stats: { homes: '120 Units', area: '8 Acres', completion: '2025' },
-    mainImage: '/images/12.jpeg',
-    images: [
-      '/images/10.jpeg',
-      '/images/14.jpeg',
-      '/images/18.jpeg',
-      '/images/16.jpeg',
-      '/images/17.jpeg',
-    ],
-    accent: '#7B170F',
-  },
-  {
-    id: 3,
-    title: 'Kumasi Central Mall',
-    location: 'CBD, Kumasi',
-    tag: 'Commercial',
-    description:
-      'A state-of-the-art commercial complex with retail spaces, office suites, and entertainment facilities designed for modern business.',
-    stats: { stores: '80+ Units', area: '12 Acres', completion: '2026' },
-    mainImage: '/images/19.jpeg',
-    images: [
-      '/images/24.jpeg',
-      '/images/21.jpeg',
-      '/images/22.jpeg',
-      '/images/23.jpeg',
-      '/images/20.jpeg',
-    ],
-    accent: '#7B170F',
-  },
-  {
-    id: 4,
-    title: 'Heritage Villas',
-    location: 'East Legon, Kumasi',
-    tag: 'Premium',
-    description:
-      'Premium gated community with custom-built villas featuring private pools, rooftop gardens, and panoramic city views.',
-    stats: { villas: '25 Units', area: '15 Acres', completion: '2024' },
-    mainImage: '/images/25.jpeg',
-    images: [
-      '/images/26.jpeg',
-      '/images/27.jpeg',
-      '/images/28.jpeg',
-      '/images/22.jpeg',
-      '/images/30.jpeg',
-    ],
-    accent: '#7B170F',
-  },
-  {
-    id: 5,
-    title: 'Garden City Residences',
-    location: 'Asokwa, Kumasi',
-    tag: 'Eco-Friendly',
-    description:
-      'Eco-friendly residential development with solar panels, rainwater harvesting, and community gardens.',
-    stats: { homes: '85 Units', area: '10 Acres', completion: '2025' },
-    mainImage: '/images/31.jpeg',
-    images: [
-      '/images/32.jpeg',
-      '/images/33.jpeg',
-      '/images/34.jpeg',
-      '/images/35.jpeg',
-      '/images/36.jpeg',
-    ],
-    accent: '#7B170F',
-  },
-  {
-    id: 6,
-    title: 'Tech Hub Tower',
-    location: 'Airport City, Kumasi',
-    tag: 'Commercial',
-    description:
-      'Modern commercial tower with co-working spaces, conference facilities, and tech incubation centers.',
-    stats: { floors: '12 Floors', area: '50,000 sqft', completion: '2026' },
-    mainImage: '/images/37.jpeg',
-    images: [
-      '/images/34.jpeg',
-      '/images/12.jpeg',
-      '/images/9.jpeg',
-      '/images/25.jpeg',
-      '/images/33.jpeg',
-    ],
-    accent: '#7B170F',
-  },
+const STATIC_PROJECTS = [
+  { id: 1, title: 'Pankrono Gardens', location: 'Pankrono, Kumasi', tag: 'Residential', description: 'A modern residential community featuring 50 luxury homes with smart home technology, landscaped gardens, and 24/7 security.', stats: { homes: '50 Units', area: '5 Acres', completion: '2024' }, mainImage: '/images/6.jpeg', images: ['/images/7.jpeg', '/images/8.jpeg', '/images/9.jpeg', '/images/10.jpeg', '/images/11.jpeg'], accent: '#7B170F' },
+  { id: 2, title: 'Atimatim Heights', location: 'Atimatim, Kumasi', tag: 'Affordable', description: 'Affordable housing project with flexible payment plans, featuring modern 2 & 3 bedroom homes perfect for first-time homeowners.', stats: { homes: '120 Units', area: '8 Acres', completion: '2025' }, mainImage: '/images/12.jpeg', images: ['/images/10.jpeg', '/images/14.jpeg', '/images/18.jpeg', '/images/16.jpeg', '/images/17.jpeg'], accent: '#7B170F' },
+  { id: 3, title: 'Kumasi Central Mall', location: 'CBD, Kumasi', tag: 'Commercial', description: 'A state-of-the-art commercial complex with retail spaces, office suites, and entertainment facilities designed for modern business.', stats: { stores: '80+ Units', area: '12 Acres', completion: '2026' }, mainImage: '/images/19.jpeg', images: ['/images/24.jpeg', '/images/21.jpeg', '/images/22.jpeg', '/images/23.jpeg', '/images/20.jpeg'], accent: '#7B170F' },
+  { id: 4, title: 'Heritage Villas', location: 'East Legon, Kumasi', tag: 'Premium', description: 'Premium gated community with custom-built villas featuring private pools, rooftop gardens, and panoramic city views.', stats: { villas: '25 Units', area: '15 Acres', completion: '2024' }, mainImage: '/images/25.jpeg', images: ['/images/26.jpeg', '/images/27.jpeg', '/images/28.jpeg', '/images/22.jpeg', '/images/30.jpeg'], accent: '#7B170F' },
+  { id: 5, title: 'Garden City Residences', location: 'Asokwa, Kumasi', tag: 'Eco-Friendly', description: 'Eco-friendly residential development with solar panels, rainwater harvesting, and community gardens.', stats: { homes: '85 Units', area: '10 Acres', completion: '2025' }, mainImage: '/images/31.jpeg', images: ['/images/32.jpeg', '/images/33.jpeg', '/images/34.jpeg', '/images/35.jpeg', '/images/36.jpeg'], accent: '#7B170F' },
+  { id: 6, title: 'Tech Hub Tower', location: 'Airport City, Kumasi', tag: 'Commercial', description: 'Modern commercial tower with co-working spaces, conference facilities, and tech incubation centers.', stats: { floors: '12 Floors', area: '50,000 sqft', completion: '2026' }, mainImage: '/images/37.jpeg', images: ['/images/34.jpeg', '/images/12.jpeg', '/images/9.jpeg', '/images/25.jpeg', '/images/33.jpeg'], accent: '#7B170F' },
 ];
+
+const normalizeProject = (p) => {
+  if (p.mainImage && p.images && p.stats) return p;
+  const gallery = Array.isArray(p.gallery) ? p.gallery.map(g => g.url ?? g.imageUrl ?? g).filter(Boolean) : [];
+  const mainImage = p.mainImage ?? p.image ?? p.imageUrl ?? p.thumbnail ?? (gallery[0] ?? '');
+  const images = p.images ?? (gallery.length > 0 ? gallery : [mainImage]).filter(Boolean);
+  const buildStats = () => {
+    const s = {};
+    if (p.units ?? p.totalUnits) s.units = `${p.units ?? p.totalUnits} Units`;
+    if (p.area ?? p.totalArea) s.area = p.area ?? p.totalArea;
+    if (p.completionYear ?? p.year) s.completion = String(p.completionYear ?? p.year);
+    else if (p.status) s.status = p.status;
+    return Object.keys(s).length > 0 ? s : { category: p.category ?? 'N/A' };
+  };
+  return {
+    ...p,
+    mainImage,
+    images: images.length > 0 ? images : [mainImage],
+    tag: p.tag ?? p.category ?? p.status ?? '',
+    location: p.location ?? p.address ?? p.city ?? '',
+    stats: p.stats ?? buildStats(),
+    accent: '#7B170F',
+  };
+};
 
 /* ─── Placeholder image generator ─── */
 const placeholder = (text) =>
@@ -513,6 +436,14 @@ export default function ProjectsSlider() {
   /* Responsive: how many cards are visible */
   const [cardsVisible, setCardsVisible] = useState(3);
 
+  const { data: projectsData } = useProjects({ limit: 20 });
+
+  const projects = (() => {
+    const list = Array.isArray(projectsData) ? projectsData : (projectsData?.data ?? null);
+    if (list && list.length > 0) return list.map(normalizeProject);
+    return STATIC_PROJECTS;
+  })();
+
   useEffect(() => {
     const update = () => {
       const w = window.innerWidth;
@@ -523,7 +454,7 @@ export default function ProjectsSlider() {
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  const maxIndex = Math.max(0, PROJECTS.length - cardsVisible);
+  const maxIndex = Math.max(0, projects.length - cardsVisible);
 
   /* ── Navigation ── */
   const goTo = useCallback(
@@ -705,7 +636,7 @@ export default function ProjectsSlider() {
                 transform: `translateX(calc(${translatePct}% - ${currentIndex * GAP}px))`,
               }}
             >
-              {PROJECTS.map((project) => (
+              {projects.map((project) => (
                 <ProjectCard key={project.id} project={project} onOpen={openModal} />
               ))}
             </div>
@@ -740,7 +671,7 @@ export default function ProjectsSlider() {
               border: '1px solid rgba(255,255,255,0.08)',
               letterSpacing: '0.05em',
             }}>
-              {currentIndex + 1}–{Math.min(currentIndex + cardsVisible, PROJECTS.length)} / {PROJECTS.length}
+              {currentIndex + 1}–{Math.min(currentIndex + cardsVisible, projects.length)} / {projects.length}
             </span>
           </div>
         </div>

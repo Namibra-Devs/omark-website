@@ -1,7 +1,8 @@
 // pages/AllEventsPage.jsx - Focused on Registered Attendees
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useEvents } from "../hooks/useEvents";
 import {
   Calendar,
   MapPin,
@@ -22,239 +23,99 @@ import {
   X,
 } from "lucide-react";
 
+const STATIC_EVENTS = [
+  {
+    id: 1,
+    title: "Grand Opening: Pankrono Gardens",
+    description: "Join us for the official launch of our premium residential community. Tour model homes, meet the architects, and enjoy exclusive opening discounts.",
+    date: "2025-04-25",
+    time: "10:00 AM - 4:00 PM",
+    location: "Pankrono Gardens Estate, Kumasi",
+    category: "Open House",
+    image: "/images/event1.jpeg",
+    status: "upcoming",
+    registrations: [
+      { id: 1, name: "John Doe", email: "john@example.com", phone: "+233 24 123 4567", guests: 2, registeredAt: "2025-03-20" },
+      { id: 2, name: "Jane Smith", email: "jane@example.com", phone: "+233 24 765 4321", guests: 1, registeredAt: "2025-03-21" },
+      { id: 3, name: "Michael Asare", email: "michael@example.com", phone: "+233 24 111 2222", guests: 3, registeredAt: "2025-03-22" },
+    ],
+  },
+  {
+    id: 2,
+    title: "Homeownership Seminar",
+    description: "Learn about flexible payment plans, mortgage options, and the home buying process in Ghana. Free consultation available.",
+    date: "2025-05-10",
+    time: "2:00 PM - 6:00 PM",
+    location: "Omark Head Office, Atimatim",
+    category: "Seminar",
+    image: "/images/event2.jpeg",
+    status: "upcoming",
+    registrations: [
+      { id: 4, name: "Kwame Mensah", email: "kwame@example.com", phone: "+233 24 333 4444", guests: 1, registeredAt: "2025-04-01" },
+      { id: 5, name: "Adwoa Serwaa", email: "adwoa@example.com", phone: "+233 24 555 6666", guests: 2, registeredAt: "2025-04-02" },
+    ],
+  },
+  {
+    id: 3,
+    title: "Sustainable Building Workshop",
+    description: "Discover eco-friendly construction techniques, energy-efficient materials, and sustainable design principles for modern homes.",
+    date: "2025-05-20",
+    time: "9:00 AM - 5:00 PM",
+    location: "Green Building Center, Kumasi",
+    category: "Workshop",
+    image: "/images/event3.jpeg",
+    status: "upcoming",
+    registrations: [
+      { id: 6, name: "Yaw Asante", email: "yaw@example.com", phone: "+233 24 777 8888", guests: 1, registeredAt: "2025-04-10" },
+    ],
+  },
+];
+
+const formatEventDate = (val) => {
+  if (!val) return '';
+  if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
+    return new Date(val).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  return val;
+};
+
+const normalizeEvent = (e) => ({
+  ...e,
+  id: e.id ?? e._id,
+  title: e.title ?? '',
+  description: e.description ?? e.summary ?? '',
+  date: formatEventDate(e.date ?? e.startDate ?? e.eventDate ?? ''),
+  time: e.time ?? e.startTime ?? '',
+  location: e.location ?? e.venue ?? e.address ?? '',
+  category: e.category ?? e.type ?? '',
+  image: e.image ?? e.imageUrl ?? e.thumbnail ?? '',
+  status: e.status ?? 'upcoming',
+  registrations: Array.isArray(e.registrations) ? e.registrations : [],
+});
+
 const AllEventsPage = () => {
-  const [events, setEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [isLoading, setIsLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    // Load events from localStorage or use default data
-    const storedEvents = localStorage.getItem("admin_events");
-    if (storedEvents) {
-      setEvents(JSON.parse(storedEvents));
-    } else {
-      // Default events data with registrations
-      setEvents([
-        {
-          id: 1,
-          title: "Grand Opening: Pankrono Gardens",
-          description:
-            "Join us for the official launch of our premium residential community. Tour model homes, meet the architects, and enjoy exclusive opening discounts.",
-          date: "2025-04-25",
-          time: "10:00 AM - 4:00 PM",
-          location: "Pankrono Gardens Estate, Kumasi",
-          category: "Open House",
-          image: "/images/event1.jpeg",
-          status: "upcoming",
-          registrations: [
-            {
-              id: 1,
-              name: "John Doe",
-              email: "john@example.com",
-              phone: "+233 24 123 4567",
-              guests: 2,
-              registeredAt: "2025-03-20",
-            },
-            {
-              id: 2,
-              name: "Jane Smith",
-              email: "jane@example.com",
-              phone: "+233 24 765 4321",
-              guests: 1,
-              registeredAt: "2025-03-21",
-            },
-            {
-              id: 3,
-              name: "Michael Asare",
-              email: "michael@example.com",
-              phone: "+233 24 111 2222",
-              guests: 3,
-              registeredAt: "2025-03-22",
-            },
-          ],
-        },
-        {
-          id: 2,
-          title: "Homeownership Seminar",
-          description:
-            "Learn about flexible payment plans, mortgage options, and the home buying process in Ghana. Free consultation available.",
-          date: "2025-05-10",
-          time: "2:00 PM - 6:00 PM",
-          location: "Omark Head Office, Atimatim",
-          category: "Seminar",
-          image: "/images/event2.jpeg",
-          status: "upcoming",
-          registrations: [
-            {
-              id: 4,
-              name: "Kwame Mensah",
-              email: "kwame@example.com",
-              phone: "+233 24 333 4444",
-              guests: 1,
-              registeredAt: "2025-04-01",
-            },
-            {
-              id: 5,
-              name: "Adwoa Serwaa",
-              email: "adwoa@example.com",
-              phone: "+233 24 555 6666",
-              guests: 2,
-              registeredAt: "2025-04-02",
-            },
-          ],
-        },
-        {
-          id: 3,
-          title: "Sustainable Building Workshop",
-          description:
-            "Discover eco-friendly construction techniques, energy-efficient materials, and sustainable design principles for modern homes.",
-          date: "2025-05-20",
-          time: "9:00 AM - 5:00 PM",
-          location: "Green Building Center, Kumasi",
-          category: "Workshop",
-          image: "/images/event3.jpeg",
-          status: "upcoming",
-          registrations: [
-            {
-              id: 6,
-              name: "Yaw Asante",
-              email: "yaw@example.com",
-              phone: "+233 24 777 8888",
-              guests: 1,
-              registeredAt: "2025-04-10",
-            },
-          ],
-        },
-        {
-          id: 4,
-          title: "Real Estate Investment Expo 2025",
-          description:
-            "Connect with investors, explore opportunities in Ghana's real estate market, and learn about high-return property investments.",
-          date: "2025-06-05",
-          time: "10:00 AM - 7:00 PM",
-          location: "Kumasi City Mall",
-          category: "Expo",
-          image: "/images/1.jpeg",
-          status: "upcoming",
-          registrations: [
-            {
-              id: 7,
-              name: "Nana Kofi",
-              email: "nana@example.com",
-              phone: "+233 24 999 0000",
-              guests: 4,
-              registeredAt: "2025-04-15",
-            },
-            {
-              id: 8,
-              name: "Ama Serwaa",
-              email: "ama@example.com",
-              phone: "+233 24 111 3333",
-              guests: 2,
-              registeredAt: "2025-04-16",
-            },
-            {
-              id: 9,
-              name: "Kweku Annan",
-              email: "kweku@example.com",
-              phone: "+233 24 555 7777",
-              guests: 1,
-              registeredAt: "2025-04-17",
-            },
-          ],
-        },
-        {
-          id: 5,
-          title: "Community Open Day",
-          description:
-            "Family-friendly event with games, food, and tours of our completed communities. Meet your future neighbors!",
-          date: "2025-06-15",
-          time: "11:00 AM - 6:00 PM",
-          location: "Heritage Villas, East Legon",
-          category: "Community",
-          image: "/images/2.jpeg",
-          status: "upcoming",
-          registrations: [],
-        },
-        {
-          id: 6,
-          title: "Construction Career Fair",
-          description:
-            "Career opportunities in construction, architecture, and real estate. Meet hiring managers and submit your resume.",
-          date: "2025-06-28",
-          time: "9:00 AM - 4:00 PM",
-          location: "Omark Construction Site Office",
-          category: "Career Fair",
-          image: "/images/event6.jpg",
-          status: "upcoming",
-          registrations: [
-            {
-              id: 10,
-              name: "Eric Boateng",
-              email: "eric@example.com",
-              phone: "+233 24 222 4444",
-              guests: 1,
-              registeredAt: "2025-05-01",
-            },
-          ],
-        },
-        {
-          id: 7,
-          title: "Luxury Property Showcase",
-          description:
-            "Exclusive preview of our premium villas and luxury estates. Private tours and champagne reception.",
-          date: "2025-07-12",
-          time: "3:00 PM - 8:00 PM",
-          location: "Heritage Villas, East Legon",
-          category: "Open House",
-          image: "/images/event7.jpg",
-          status: "upcoming",
-          registrations: [],
-        },
-        {
-          id: 8,
-          title: "Digital Marketing for Real Estate",
-          description:
-            "Learn how to effectively market properties online, leverage social media, and attract more buyers.",
-          date: "2025-07-25",
-          time: "10:00 AM - 4:00 PM",
-          location: "Omark Training Center, Pankrono",
-          category: "Workshop",
-          image: "/images/event8.jpg",
-          status: "upcoming",
-          registrations: [],
-        },
-        {
-          id: 9,
-          title: "Annual Real Estate Gala",
-          description:
-            "Celebrating excellence in real estate development. Awards ceremony, networking, and entertainment.",
-          date: "2025-08-20",
-          time: "6:00 PM - 11:00 PM",
-          location: "Kumasi City Hotel",
-          category: "Expo",
-          image: "/images/event9.jpg",
-          status: "upcoming",
-          registrations: [],
-        },
-      ]);
-    }
-    setIsLoading(false);
-  }, []);
+  const { data: eventsData, isLoading } = useEvents({ limit: 100 });
 
-  const categories = [
-    "all",
-    "Open House",
-    "Seminar",
-    "Workshop",
-    "Expo",
-    "Community",
-    "Career Fair",
-  ];
+  const events = useMemo(() => {
+    const list = Array.isArray(eventsData) ? eventsData : (eventsData?.data ?? null);
+    return list && list.length > 0 ? list.map(normalizeEvent) : STATIC_EVENTS;
+  }, [eventsData]);
+
+  const categories = useMemo(() => {
+    const cats = [...new Set(events.map(e => e.category).filter(Boolean))];
+    return ["all", ...cats];
+  }, [events]);
+
+  useEffect(() => {
+    document.body.style.overflow = isModalOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isModalOpen]);
 
   const filteredEvents = events.filter((event) => {
     const matchesSearch =
@@ -269,13 +130,11 @@ const AllEventsPage = () => {
   const openAttendeesModal = (event) => {
     setSelectedEvent(event);
     setIsModalOpen(true);
-    document.body.style.overflow = "hidden";
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedEvent(null);
-    document.body.style.overflow = "unset";
   };
 
   const exportRegistrations = (event) => {

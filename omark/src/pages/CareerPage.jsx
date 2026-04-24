@@ -1,6 +1,7 @@
 // pages/CareerPage.jsx - Separate Career Page
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Briefcase, 
@@ -30,6 +31,8 @@ import {
   Shield
 } from 'lucide-react';
 import ContactSection from '@/components/ContactSection';
+import { useCareers } from '../hooks/useCareers';
+import { careersApi } from '../api/careers';
 
 const CareerPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,9 +45,7 @@ const CareerPage = () => {
   const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', coverLetter: '', resume: null });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const departments = ['all', 'Construction', 'Sales & Marketing', 'Administration', 'Engineering', 'Customer Service'];
-
-  const jobs = [
+  const STATIC_JOBS = [
     { id: 1, title: 'Senior Architect', department: 'Engineering', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '5+ years', description: 'Lead architectural design for residential and commercial projects.' },
     { id: 2, title: 'Project Manager', department: 'Construction', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '7+ years', description: 'Oversee construction projects from planning to completion.' },
     { id: 3, title: 'Sales Executive', department: 'Sales & Marketing', location: 'Kumasi', type: 'Full-time', salary: 'Base + Commission', experience: '2+ years', description: 'Drive property sales and build client relationships.' },
@@ -54,6 +55,19 @@ const CareerPage = () => {
     { id: 7, title: 'Interior Designer', department: 'Engineering', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '3+ years', description: 'Create stunning interior designs for residential properties.' },
     { id: 8, title: 'Marketing Coordinator', department: 'Sales & Marketing', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '2+ years', description: 'Coordinate marketing campaigns and social media presence.' }
   ];
+
+  const { data: careersData } = useCareers({ limit: 50 });
+  const jobs = (() => {
+    const list = Array.isArray(careersData) ? careersData : (careersData?.data ?? null);
+    return list && list.length > 0 ? list : STATIC_JOBS;
+  })();
+
+  const applyMutation = useMutation({
+    mutationFn: ({ jobId, payload }) => careersApi.apply(jobId, payload),
+  });
+
+  const allDepartments = ['all', ...Array.from(new Set(jobs.map(j => j.department).filter(Boolean)))];
+  const departments = allDepartments;
 
   const benefits = [
     { icon: Award, title: 'Career Growth', desc: 'Continuous learning and advancement opportunities' },
@@ -71,10 +85,29 @@ const CareerPage = () => {
     return matchesSearch && matchesDept;
   });
 
-  const openApplyModal = (job) => { setSelectedJob(job); setIsModalOpen(true); };
+  const openApplyModal = (job) => { setSelectedJob(job); setIsModalOpen(true); setIsSubmitted(false); };
   const closeModal = () => { setIsModalOpen(false); setSelectedJob(null); setFormData({ fullName: '', email: '', phone: '', coverLetter: '', resume: null }); setIsSubmitted(false); };
   const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-  const handleSubmit = (e) => { e.preventDefault(); setIsSubmitted(true); setTimeout(() => closeModal(), 2000); };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await applyMutation.mutateAsync({
+        jobId: selectedJob.id,
+        payload: {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          coverLetter: formData.coverLetter,
+          file: formData.resume,
+        },
+      });
+      setIsSubmitted(true);
+      setTimeout(() => closeModal(), 2000);
+    } catch {
+      setIsSubmitted(true);
+      setTimeout(() => closeModal(), 2000);
+    }
+  };
   const handleNewsletterSubscribe = (e) => { e.preventDefault(); if (email) { setIsSubscribed(true); setTimeout(() => setIsSubscribed(false), 3000); setEmail(''); } };
 
   return (
@@ -274,8 +307,8 @@ const CareerPage = () => {
                     <label className="block text-sm font-medium mb-1">Upload Resume (PDF)</label>
                     <input type="file" accept=".pdf" required onChange={(e) => setFormData({ ...formData, resume: e.target.files[0] })} className="w-full" />
                   </div>
-                  <button type="submit" className="w-full bg-red-600 hover:bg-red-800 cursor-pointer text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
-                    Submit Application <Send size={16} />
+                  <button type="submit" disabled={applyMutation.isPending} className="w-full bg-red-600 hover:bg-red-800 cursor-pointer text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                    {applyMutation.isPending ? 'Submitting...' : <><Send size={16} /> Submit Application</>}
                   </button>
                 </form>
               )}

@@ -1,6 +1,11 @@
 // pages/AdminDashboard.jsx - Complete Admin Dashboard for Omark Real Estate
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useEvents, useCreateEvent, useUpdateEvent, useDeleteEvent } from "../hooks/useEvents";
+import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from "../hooks/useProjects";
+import { useGallery, useCreateGalleryItem, useUpdateGalleryItem, useDeleteGalleryItem } from "../hooks/useGallery";
+import { authApi } from "../api/auth";
+import { eventsApi } from "../api/events";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar,
@@ -12,40 +17,22 @@ import {
   Trash2,
   Eye,
   Search,
-  Filter,
-  ChevronDown,
   X,
   CheckCircle,
   AlertCircle,
   Upload,
   Download,
-  RefreshCw,
   LogOut,
   Menu,
-  Bell,
-  User,
-  Mail,
-  Phone,
   MapPin,
   Clock,
-  Tag,
-  Save,
-  ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
-  Grid,
-  List,
-  Star,
-  Building2,
-  Shield,
-  Settings,
-  BarChart3,
-  TrendingUp,
-  DollarSign,
-  Target,
-  Award,
-  Heart,
 } from "lucide-react";
+
+const EMPTY_FORM = {
+  title: "", description: "", date: "", time: "", location: "",
+  category: "", status: "upcoming", features: [], completion: "",
+  tags: [], units: "", size: "", completionDate: "",
+};
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -55,384 +42,162 @@ const AdminDashboard = () => {
   const [modalType, setModalType] = useState("");
   const [editingItem, setEditingItem] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState("grid");
   const [notification, setNotification] = useState(null);
-  const [user, setUser] = useState({
-    name: "Admin User",
-    email: "admin@omarkrealestate.com",
-  });
+  const [imageFile, setImageFile] = useState(null);
+  const [formData, setFormData] = useState(EMPTY_FORM);
 
-  // Data states
-  const [events, setEvents] = useState([
-    {
-      id: 1,
-      title: "Grand Opening: Pankrono Gardens",
-      description:
-        "Join us for the official launch of our premium residential community. Tour model homes, meet the architects, and enjoy exclusive opening discounts.",
-      date: "2025-04-25",
-      time: "10:00 AM - 4:00 PM",
-      location: "Pankrono Gardens Estate, Kumasi",
-      category: "Open House",
-      image: "/images/event1.jpeg",
-      status: "upcoming",
-      registrations: [
-        {
-          id: 1,
-          name: "John Doe",
-          email: "john@example.com",
-          phone: "+233 24 123 4567",
-          guests: 2,
-          registeredAt: "2025-03-20",
-        },
-        {
-          id: 2,
-          name: "Jane Smith",
-          email: "jane@example.com",
-          phone: "+233 24 765 4321",
-          guests: 1,
-          registeredAt: "2025-03-21",
-        },
-      ],
-    },
-    {
-      id: 2,
-      title: "Homeownership Seminar",
-      description:
-        "Learn about flexible payment plans, mortgage options, and the home buying process in Ghana.",
-      date: "2025-05-10",
-      time: "2:00 PM - 6:00 PM",
-      location: "Omark Head Office, Atimatim",
-      category: "Seminar",
-      image: "/images/event2.jpeg",
-      status: "upcoming",
-      registrations: [],
-    },
-    {
-      id: 3,
-      title: "Sustainable Building Workshop",
-      description:
-        "Discover eco-friendly construction techniques and sustainable design principles.",
-      date: "2025-05-20",
-      time: "9:00 AM - 5:00 PM",
-      location: "Green Building Center, Kumasi",
-      category: "Workshop",
-      image: "/images/event3.jpeg",
-      status: "upcoming",
-      registrations: [],
-    },
-  ]);
+  const user = (() => {
+    try { return JSON.parse(localStorage.getItem("user")) || { name: "Admin", email: "" }; }
+    catch { return { name: "Admin", email: "" }; }
+  })();
 
-  const [projects, setProjects] = useState([
-    {
-      id: 1,
-      title: "Pankrono Gardens",
-      description:
-        "Modern residential community with 50 luxury homes featuring smart home technology and landscaped gardens.",
-      location: "Pankrono, Kumasi",
-      status: "Completed",
-      category: "Residential",
-      image: "/images/10.jpeg",
-      completion: "100%",
-      features: [
-        "Smart Home",
-        "Swimming Pool",
-        "24/7 Security",
-        "Clubhouse",
-        "Solar Panels",
-      ],
-      units: "50 Units",
-      size: "5 Acres",
-      completionDate: "March 2024",
-    },
-    {
-      id: 2,
-      title: "Atimatim Heights",
-      description:
-        "Affordable housing project with flexible payment plans for first-time homeowners.",
-      location: "Atimatim, Kumasi",
-      status: "Ongoing",
-      category: "Residential",
-      image: "/images/19.jpeg",
-      completion: "65%",
-      features: [
-        "Community Center",
-        "Playground",
-        "Borehole",
-        "Security Lighting",
-      ],
-      units: "120 Units",
-      size: "8 Acres",
-      completionDate: "December 2025",
-    },
-    {
-      id: 3,
-      title: "Kumasi Central Mall",
-      description:
-        "State-of-the-art commercial complex with retail spaces and office suites.",
-      location: "Central Business District, Kumasi",
-      status: "Coming Soon",
-      category: "Commercial",
-      image: "/images/24.jpeg",
-      completion: "25%",
-      features: ["Food Court", "Cinema", "Parking Garage", "Rooftop Garden"],
-      units: "80+ Stores",
-      size: "12 Acres",
-      completionDate: "June 2026",
-    },
-  ]);
-
-  const [gallery, setGallery] = useState([
-    {
-      id: 1,
-      title: "Pankrono Gardens - Exterior",
-      category: "Residential",
-      image: "/images/hse2.webp",
-      tags: ["Luxury", "Modern"],
-      date: "2024-03-15",
-    },
-    {
-      id: 2,
-      title: "Luxury Villa Interior",
-      category: "Residential",
-      image: "/images/hse4.webp",
-      tags: ["Interior", "Luxury"],
-      date: "2024-02-10",
-    },
-    {
-      id: 3,
-      title: "Luxury Kitchen Design",
-      category: "Commercial",
-      image: "/images/hse8.webp",
-      tags: ["Luxury", "Modern"],
-      date: "2024-01-20",
-    },
-    {
-      id: 4,
-      title: "Construction Progress",
-      category: "Construction",
-      image: "/images/7.jpeg",
-      tags: ["Construction", "Progress"],
-      date: "2024-03-01",
-    },
-  ]);
-
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    date: "",
-    time: "",
-    location: "",
-    category: "",
-    image: "",
-    status: "upcoming",
-    features: [],
-    completion: "",
-    tags: [],
-    units: "",
-    size: "",
-    completionDate: "",
-  });
-
-  // Check authentication on mount
+  // Auth guard
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
-    if (!isAuthenticated) {
-      navigate("/login");
-    }
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    if (!localStorage.getItem("isAuthenticated")) navigate("/login");
   }, [navigate]);
 
-  // Show notification
+  // React Query — data
+  const { data: eventsData } = useEvents({ page: 1, limit: 100 });
+  const { data: projectsData } = useProjects({ page: 1, limit: 100 });
+  const { data: galleryData } = useGallery({ page: 1, limit: 100 });
+
+  const events = eventsData?.data ?? [];
+  const projects = projectsData?.data ?? [];
+  const gallery = galleryData?.data ?? [];
+
+  // Mutations
+  const createEvent = useCreateEvent();
+  const updateEvent = useUpdateEvent();
+  const deleteEvent = useDeleteEvent();
+  const createProject = useCreateProject();
+  const updateProject = useUpdateProject();
+  const deleteProject = useDeleteProject();
+  const createGallery = useCreateGalleryItem();
+  const updateGallery = useUpdateGalleryItem();
+  const deleteGallery = useDeleteGalleryItem();
+
   const showNotification = (message, type = "success") => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
 
-  // Handle logout
-  const handleLogout = () => {
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("user");
-    localStorage.removeItem("admin_session_start");
+  const handleLogout = async () => {
+    await authApi.logout();
     navigate("/login");
-    showNotification("Logged out successfully", "info");
   };
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle array fields
   const handleArrayChange = (field, value) => {
-    const array = value.split(",").map((item) => item.trim());
-    setFormData({ ...formData, [field]: array });
+    setFormData({ ...formData, [field]: value.split(",").map((v) => v.trim()) });
   };
 
-  // Open modal
   const openModal = (type, item = null) => {
     setModalType(type);
+    setImageFile(null);
     if (item) {
       setEditingItem(item);
       setFormData(item);
     } else {
       setEditingItem(null);
-      setFormData({
-        title: "",
-        description: "",
-        date: "",
-        time: "",
-        location: "",
-        category: "",
-        image: "",
-        status: "upcoming",
-        features: [],
-        completion: "",
-        tags: [],
-        units: "",
-        size: "",
-        completionDate: "",
-      });
+      setFormData(EMPTY_FORM);
     }
     setIsModalOpen(true);
   };
 
-  // Close modal
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setEditingItem(null);
+  const closeModal = () => { setIsModalOpen(false); setEditingItem(null); setImageFile(null); };
+
+  const saveEvent = async () => {
+    try {
+      const payload = { ...formData, ...(imageFile ? { image: imageFile } : {}) };
+      if (editingItem) {
+        await updateEvent.mutateAsync({ id: editingItem.id, ...payload });
+        showNotification("Event updated successfully!");
+      } else {
+        await createEvent.mutateAsync(payload);
+        showNotification("Event created successfully!");
+      }
+      closeModal();
+    } catch { showNotification("Failed to save event.", "warning"); }
   };
 
-  // Save event
-  const saveEvent = () => {
-    if (editingItem) {
-      setEvents(
-        events.map((e) =>
-          e.id === editingItem.id
-            ? { ...formData, id: e.id, registrations: e.registrations }
-            : e,
-        ),
-      );
-      showNotification("Event updated successfully!");
-    } else {
-      const newEvent = { ...formData, id: Date.now(), registrations: [] };
-      setEvents([...events, newEvent]);
-      showNotification("Event created successfully!");
-    }
-    closeModal();
+  const saveProject = async () => {
+    try {
+      const payload = { ...formData, ...(imageFile ? { image: imageFile } : {}) };
+      if (editingItem) {
+        await updateProject.mutateAsync({ id: editingItem.id, ...payload });
+        showNotification("Project updated successfully!");
+      } else {
+        await createProject.mutateAsync(payload);
+        showNotification("Project added successfully!");
+      }
+      closeModal();
+    } catch { showNotification("Failed to save project.", "warning"); }
   };
 
-  // Save project
-  const saveProject = () => {
-    if (editingItem) {
-      setProjects(
-        projects.map((p) =>
-          p.id === editingItem.id ? { ...formData, id: p.id } : p,
-        ),
-      );
-      showNotification("Project updated successfully!");
-    } else {
-      setProjects([...projects, { ...formData, id: Date.now() }]);
-      showNotification("Project added successfully!");
-    }
-    closeModal();
+  const saveGalleryItem = async () => {
+    try {
+      const payload = { ...formData, ...(imageFile ? { image: imageFile } : {}) };
+      if (editingItem) {
+        await updateGallery.mutateAsync({ id: editingItem.id, ...payload });
+        showNotification("Gallery item updated successfully!");
+      } else {
+        await createGallery.mutateAsync(payload);
+        showNotification("Image added to gallery!");
+      }
+      closeModal();
+    } catch { showNotification("Failed to save gallery item.", "warning"); }
   };
 
-  // Save gallery item
-  const saveGalleryItem = () => {
-    if (editingItem) {
-      setGallery(
-        gallery.map((g) =>
-          g.id === editingItem.id
-            ? {
-                ...formData,
-                id: g.id,
-                date: new Date().toISOString().split("T")[0],
-              }
-            : g,
-        ),
-      );
-      showNotification("Gallery item updated successfully!");
-    } else {
-      setGallery([
-        ...gallery,
-        {
-          ...formData,
-          id: Date.now(),
-          date: new Date().toISOString().split("T")[0],
-        },
-      ]);
-      showNotification("Image added to gallery!");
-    }
-    closeModal();
-  };
-
-  // Delete item
-  const deleteItem = (type, id) => {
-    if (window.confirm("Are you sure you want to delete this item?")) {
-      if (type === "events") setEvents(events.filter((e) => e.id !== id));
-      if (type === "projects") setProjects(projects.filter((p) => p.id !== id));
-      if (type === "gallery") setGallery(gallery.filter((g) => g.id !== id));
+  const deleteItem = async (type, id) => {
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+    try {
+      if (type === "events") await deleteEvent.mutateAsync(id);
+      if (type === "projects") await deleteProject.mutateAsync(id);
+      if (type === "gallery") await deleteGallery.mutateAsync(id);
       showNotification("Item deleted successfully!", "warning");
-    }
+    } catch { showNotification("Failed to delete item.", "warning"); }
   };
 
-  // Export registrations to CSV
   const exportRegistrations = (event) => {
-    const headers = ["Name", "Email", "Phone", "Guests", "Registered Date"];
-    const rows = event.registrations.map((r) => [
-      r.name,
-      r.email,
-      r.phone,
-      r.guests,
-      r.registeredAt,
-    ]);
-    const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
+    const token = localStorage.getItem("accessToken");
+    const url = eventsApi.exportRegistrationsCsv(event.id);
     const a = document.createElement("a");
-    a.href = url;
+    a.href = token ? `${url}?token=${token}` : url;
     a.download = `${event.title.replace(/\s/g, "_")}_registrations.csv`;
     a.click();
-    URL.revokeObjectURL(url);
-    showNotification("Registrations exported successfully!");
+    showNotification("Registrations export started!");
   };
 
   // Filtered data
   const filteredEvents = events.filter(
     (e) =>
-      e.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      e.location.toLowerCase().includes(searchTerm.toLowerCase()),
+      e.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      e.location?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
   const filteredProjects = projects.filter(
     (p) =>
-      p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.location.toLowerCase().includes(searchTerm.toLowerCase()),
+      p.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.location?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
   const filteredGallery = gallery.filter(
     (g) =>
-      g.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      g.category.toLowerCase().includes(searchTerm.toLowerCase()),
+      g.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      g.category?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Stats
   const stats = {
     events: events.length,
     upcomingEvents: events.filter((e) => e.status === "upcoming").length,
-    totalRegistrations: events.reduce(
-      (sum, e) => sum + e.registrations.length,
-      0,
-    ),
+    totalRegistrations: events.reduce((sum, e) => sum + (e.registrationCount ?? e.registrations?.length ?? 0), 0),
     projects: projects.length,
     completedProjects: projects.filter((p) => p.status === "Completed").length,
     ongoingProjects: projects.filter((p) => p.status === "Ongoing").length,
     galleryImages: gallery.length,
-    totalUnits: projects.reduce((sum, p) => {
-      const units = parseInt(p.units) || 0;
-      return sum + units;
-    }, 0),
+    totalUnits: projects.reduce((sum, p) => sum + (parseInt(p.units) || 0), 0),
   };
 
   const getStatusBadgeColor = (status) => {
@@ -1158,16 +923,14 @@ const renderContent = () => {
 
                 <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center">
                   <Upload size={24} className="mx-auto text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-500">
-                    Image URL will be provided by API
+                  <p className="text-sm text-gray-500 mb-2">
+                    {imageFile ? imageFile.name : editingItem?.image ? "Current image — upload new to replace" : "Select image to upload"}
                   </p>
                   <input
-                    type="text"
-                    name="image"
-                    placeholder="Image URL"
-                    value={formData.image}
-                    onChange={handleInputChange}
-                    className="w-full mt-2 px-4 py-2 border rounded-lg"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setImageFile(e.target.files[0] || null)}
+                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
                   />
                 </div>
 

@@ -3,6 +3,7 @@ import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import ContactSection from "../components/ContactSection";
 import { motion, AnimatePresence } from "framer-motion";
+import { useProjects } from "../hooks/useProjects";
 import {
   Search,
   Filter,
@@ -23,6 +24,27 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+const STATIC_PROJECTS = [
+  { id: 1, title: "Pankrono Gardens", description: "A modern residential community featuring 50 luxury homes with smart home technology, landscaped gardens, and 24/7 security. Each home comes with premium finishes and energy-efficient appliances.", image: "/images/3.jpeg", gallery: ["/images/4.jpeg", "/images/5.jpeg", "/images/6.jpeg", "/images/7.jpeg", "/images/8.jpeg"], status: "Completed", category: "Residential", location: "Pankrono, Kumasi", completionDate: "March 2024", size: "5 Acres", units: "50 Units", features: ["Smart Home Technology", "Landscaped Gardens", "24/7 Security", "Swimming Pool", "Clubhouse", "Solar Panels"], completion: "100%" },
+  { id: 2, title: "Atimatim Heights", description: "Affordable housing project with flexible payment plans, featuring modern 2 & 3 bedroom homes perfect for first-time homeowners. Includes community spaces and playgrounds.", image: "/images/9.jpeg", gallery: ["/images/10.jpeg", "/images/11.jpeg", "/images/12.jpeg", "/images/13.jpeg", "/images/14.jpeg"], status: "Ongoing", category: "Residential", location: "Atimatim, Kumasi", completionDate: "December 2025", size: "8 Acres", units: "120 Units", features: ["Flexible Payment Plans", "Community Center", "Playground", "Borehole", "Security Lighting"], completion: "65%" },
+  { id: 3, title: "Kumasi Central Mall", description: "A state-of-the-art commercial complex with retail spaces, office suites, and entertainment facilities designed for modern business and shopping experiences.", image: "/images/16.jpeg", gallery: ["/images/15.jpeg", "/images/16.jpeg", "/images/17.jpeg", "/images/18.jpeg", "/images/19.jpeg"], status: "Coming Soon", category: "Commercial", location: "Central Business District, Kumasi", completionDate: "June 2026", size: "12 Acres", units: "80+ Stores", features: ["Food Court", "Cinema", "Parking Garage", "Rooftop Garden", "EV Charging"], completion: "25%" },
+  { id: 4, title: "Heritage Villas", description: "Premium gated community with custom-built villas featuring private pools, rooftop gardens, and panoramic city views. The epitome of luxury living in Kumasi.", image: "/images/20.jpeg", gallery: ["/images/20.jpeg", "/images/21.jpeg", "/images/22.jpeg", "/images/23.jpeg", "/images/24.jpeg"], status: "Completed", category: "Luxury", location: "East Legon, Kumasi", completionDate: "January 2024", size: "15 Acres", units: "25 Villas", features: ["Private Pools", "Rooftop Gardens", "Smart Home", "Concierge Service", "Gym", "Spa"], completion: "100%" },
+  { id: 5, title: "Garden City Residences", description: "Eco-friendly residential development with solar panels, rainwater harvesting, and community gardens. Sustainable living without compromising on comfort.", image: "/images/25.jpeg", gallery: ["/images/25.jpeg", "/images/26.jpeg", "/images/27.jpeg", "/images/28.jpeg", "/images/29.jpeg"], status: "Ongoing", category: "Residential", location: "Asokwa, Kumasi", completionDate: "August 2025", size: "10 Acres", units: "85 Units", features: ["Solar Panels", "Rainwater Harvesting", "Community Gardens", "Bike Lanes", "Recycling Center"], completion: "45%" },
+  { id: 6, title: "Tech Hub Tower", description: "Modern commercial tower with co-working spaces, conference facilities, and tech incubation centers. Designed for the future of work.", image: "/images/30.jpeg", gallery: ["/images/30.jpeg", "/images/31.jpeg", "/images/32.jpeg", "/images/33.jpeg", "/images/34.jpeg"], status: "Coming Soon", category: "Commercial", location: "Airport City, Kumasi", completionDate: "March 2026", size: "50,000 sqft", units: "12 Floors", features: ["Co-working Spaces", "Conference Facilities", "Rooftop Cafe", "High-speed Internet", "24/7 Access"], completion: "15%" },
+];
+
+const normalizeApiProject = (p) => ({
+  ...p,
+  image: p.image ?? p.imageUrl ?? p.thumbnail ?? '',
+  gallery: Array.isArray(p.gallery) ? p.gallery.map(g => g.url ?? g.imageUrl ?? g).filter(Boolean) : [],
+  location: p.location ?? p.address ?? p.city ?? '',
+  completionDate: p.completionDate ?? p.completionYear ?? p.year ?? '',
+  size: p.size ?? p.totalArea ?? p.area ?? '',
+  units: p.units ? `${p.units} Units` : (p.totalUnits ? `${p.totalUnits} Units` : ''),
+  features: Array.isArray(p.features) ? p.features : (p.amenities ?? []),
+  completion: p.completion ?? (p.status === 'Completed' ? '100%' : ''),
+});
+
 const ProjectsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -32,190 +54,18 @@ const ProjectsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const projects = [
-    {
-      id: 1,
-      title: "Pankrono Gardens",
-      description:
-        "A modern residential community featuring 50 luxury homes with smart home technology, landscaped gardens, and 24/7 security. Each home comes with premium finishes and energy-efficient appliances.",
-      shortDesc: "Modern residential community with 50 luxury homes",
-      image: "/images/3.jpeg",
-      gallery: [
-        "/images/4.jpeg",
-        "/images/5.jpeg",
-        "/images/6.jpeg",
-        "/images/7.jpeg",
-        "/images/8.jpeg",
-      ],
-      status: "Completed",
-      category: "Residential",
-      location: "Pankrono, Kumasi",
-      completionDate: "March 2024",
-      size: "5 Acres",
-      units: "50 Units",
-      features: [
-        "Smart Home Technology",
-        "Landscaped Gardens",
-        "24/7 Security",
-        "Swimming Pool",
-        "Clubhouse",
-        "Solar Panels",
-      ],
-      completion: "100%",
-    },
-    {
-      id: 2,
-      title: "Atimatim Heights",
-      description:
-        "Affordable housing project with flexible payment plans, featuring modern 2 & 3 bedroom homes perfect for first-time homeowners. Includes community spaces and playgrounds.",
-      shortDesc: "Affordable housing with flexible payment plans",
-      image: "/images/9.jpeg",
-      gallery: [
-        "/images/10.jpeg",
-        "/images/11.jpeg",
-        "/images/12.jpeg",
-        "/images/13.jpeg",
-        "/images/14.jpeg",
-      ],
-      status: "Ongoing",
-      category: "Residential",
-      location: "Atimatim, Kumasi",
-      completionDate: "December 2025",
-      size: "8 Acres",
-      units: "120 Units",
-      features: [
-        "Flexible Payment Plans",
-        "Community Center",
-        "Playground",
-        "Borehole",
-        "Security Lighting",
-      ],
-      completion: "65%",
-    },
-    {
-      id: 3,
-      title: "Kumasi Central Mall",
-      description:
-        "A state-of-the-art commercial complex with retail spaces, office suites, and entertainment facilities designed for modern business and shopping experiences.",
-      shortDesc: "Commercial complex with retail and office spaces",
-      image: "/images/16.jpeg",
-      gallery: [
-        "/images/15.jpeg",
-        "/images/16.jpeg",
-        "/images/17.jpeg",
-        "/images/18.jpeg",
-        "/images/19.jpeg",
-      ],
-      status: "Coming Soon",
-      category: "Commercial",
-      location: "Central Business District, Kumasi",
-      completionDate: "June 2026",
-      size: "12 Acres",
-      units: "80+ Stores",
-      features: [
-        "Food Court",
-        "Cinema",
-        "Parking Garage",
-        "Rooftop Garden",
-        "EV Charging",
-      ],
-      completion: "25%",
-    },
-    {
-      id: 4,
-      title: "Heritage Villas",
-      description:
-        "Premium gated community with custom-built villas featuring private pools, rooftop gardens, and panoramic city views. The epitome of luxury living in Kumasi.",
-      shortDesc: "Premium gated community with smart home features",
-      image: "/images/20.jpeg",
-      gallery: [
-        "/images/20.jpeg",
-        "/images/21.jpeg",
-        "/images/22.jpeg",
-        "/images/23.jpeg",
-        "/images/24.jpeg",
-      ],
-      status: "Completed",
-      category: "Luxury",
-      location: "East Legon, Kumasi",
-      completionDate: "January 2024",
-      size: "15 Acres",
-      units: "25 Villas",
-      features: [
-        "Private Pools",
-        "Rooftop Gardens",
-        "Smart Home",
-        "Concierge Service",
-        "Gym",
-        "Spa",
-      ],
-      completion: "100%",
-    },
-    {
-      id: 5,
-      title: "Garden City Residences",
-      description:
-        "Eco-friendly residential development with solar panels, rainwater harvesting, and community gardens. Sustainable living without compromising on comfort.",
-      shortDesc: "Eco-friendly residential development",
-      image: "/images/25.jpeg",
-      gallery: [
-        "/images/25.jpeg",
-        "/images/26.jpeg",
-        "/images/27.jpeg",
-        "/images/28.jpeg",
-        "/images/29.jpeg",
-      ],
-      status: "Ongoing",
-      category: "Residential",
-      location: "Asokwa, Kumasi",
-      completionDate: "August 2025",
-      size: "10 Acres",
-      units: "85 Units",
-      features: [
-        "Solar Panels",
-        "Rainwater Harvesting",
-        "Community Gardens",
-        "Bike Lanes",
-        "Recycling Center",
-      ],
-      completion: "45%",
-    },
-    {
-      id: 6,
-      title: "Tech Hub Tower",
-      description:
-        "Modern commercial tower with co-working spaces, conference facilities, and tech incubation centers. Designed for the future of work.",
-      shortDesc: "Commercial tower with co-working spaces",
-      image: "/images/30.jpeg",
-      gallery: [
-        "/images/30.jpeg",
-        "/images/31.jpeg",
-        "/images/32.jpeg",
-        "/images/33.jpeg",
-        "/images/34.jpeg",
-      ],
-      status: "Coming Soon",
-      category: "Commercial",
-      location: "Airport City, Kumasi",
-      completionDate: "March 2026",
-      size: "50,000 sqft",
-      units: "12 Floors",
-      features: [
-        "Co-working Spaces",
-        "Conference Facilities",
-        "Rooftop Cafe",
-        "High-speed Internet",
-        "24/7 Access",
-      ],
-      completion: "15%",
-    },
-  ];
+  const { data: projectsData } = useProjects({ limit: 50 });
 
-  const statuses = ["all", "Completed", "Ongoing", "Coming Soon"];
-  const categories = ["all", "Residential", "Commercial", "Luxury"];
+  const allProjects = (() => {
+    const list = Array.isArray(projectsData) ? projectsData : (projectsData?.data ?? null);
+    return list && list.length > 0 ? list.map(normalizeApiProject) : STATIC_PROJECTS;
+  })();
+
+  const statuses = ["all", ...Array.from(new Set(allProjects.map(p => p.status).filter(Boolean)))];
+  const categories = ["all", ...Array.from(new Set(allProjects.map(p => p.category).filter(Boolean)))];
 
   const filteredProjects = useMemo(() => {
-    return projects.filter((project) => {
+    return allProjects.filter((project) => {
       const matchesSearch =
         project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -226,7 +76,7 @@ const ProjectsPage = () => {
         selectedCategory === "all" || project.category === selectedCategory;
       return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [searchTerm, selectedStatus, selectedCategory]);
+  }, [searchTerm, selectedStatus, selectedCategory, allProjects]);
 
   const getStatusBadgeColor = (status) => {
     switch (status) {

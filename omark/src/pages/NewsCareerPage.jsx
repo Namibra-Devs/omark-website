@@ -1,17 +1,22 @@
 // pages/NewsCareerPage.jsx - Updated with real images instead of icons
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ContactSection from '../components/ContactSection';
-import { 
-  Calendar, 
-  User, 
-  ArrowRight, 
-  Search, 
-  Filter, 
-  ChevronDown, 
-  Clock, 
-  Eye, 
+import { useNews, useLikeArticle } from '../hooks/useNews';
+import { useSubscribeNewsletter } from '../hooks/useNewsletter';
+import { useCareers } from '../hooks/useCareers';
+import { careersApi } from '../api/careers';
+import { useMutation } from '@tanstack/react-query';
+import {
+  Calendar,
+  User,
+  ArrowRight,
+  Search,
+  Filter,
+  ChevronDown,
+  Clock,
+  Eye,
   Heart,
   Mail,
   Send,
@@ -24,8 +29,27 @@ import {
   TrendingUp,
   Building2,
   X,
-  Phone
+  Phone,
+  Loader2
 } from 'lucide-react';
+
+const STATIC_NEWS = [
+  { id: 1, title: 'Omark Real Estate Wins Best Developer Award 2024', excerpt: 'We are proud to announce that Omark Real Estate has been recognized as the Best Real Estate Developer at the Ghana Property Awards 2024.', category: 'Awards', image: '/images/award1.png', date: 'March 15, 2025', author: 'Admin', readTime: '3 min read', views: 1245, featured: true },
+  { id: 2, title: 'Pankrono Gardens Phase 2 Launch Announced', excerpt: 'Due to high demand, we are excited to announce the launch of Phase 2 at Pankrono Gardens with 30 additional luxury homes.', category: 'Projects', image: '/images/bb.jpeg', date: 'March 10, 2025', author: 'Admin', readTime: '2 min read', views: 892, featured: false },
+  { id: 3, title: 'Affordable Housing Initiative: 500 New Homes', excerpt: 'Omark partners with government to deliver 500 affordable homes for low and middle-income families across the Ashanti Region.', category: 'Company News', image: '/images/bbb.png', date: 'March 5, 2025', author: 'Admin', readTime: '4 min read', views: 2100, featured: false },
+  { id: 4, title: 'Sustainable Building Practices at Omark', excerpt: 'Learn how Omark is leading the way in eco-friendly construction with solar-powered homes and sustainable materials.', category: 'Industry Insights', image: '/images/bbbbb.png', date: 'February 28, 2025', author: 'Admin', readTime: '5 min read', views: 678, featured: false },
+  { id: 5, title: 'Community Outreach: Building Schools in Rural Areas', excerpt: 'Omark continues its commitment to community development with the construction of three new schools in underserved communities.', category: 'Community', image: '/images/c.png', date: 'February 20, 2025', author: 'Admin', readTime: '3 min read', views: 1543, featured: false },
+  { id: 6, title: "Real Estate Market Outlook 2025", excerpt: "Expert insights on Ghana's real estate market trends, opportunities, and predictions for the coming year.", category: 'Industry Insights', image: '/images/cc.jpeg', date: 'February 15, 2025', author: 'Admin', readTime: '6 min read', views: 987, featured: false },
+];
+
+const STATIC_JOBS = [
+  { id: 1, title: 'Senior Architect', department: 'Engineering', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '5+ years', description: 'Lead architectural design for residential and commercial projects.' },
+  { id: 2, title: 'Project Manager', department: 'Construction', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '7+ years', description: 'Oversee construction projects from planning to completion.' },
+  { id: 3, title: 'Sales Executive', department: 'Sales & Marketing', location: 'Kumasi', type: 'Full-time', salary: 'Base + Commission', experience: '2+ years', description: 'Drive property sales and build client relationships.' },
+  { id: 4, title: 'Civil Engineer', department: 'Engineering', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '3+ years', description: 'Design and supervise civil engineering works.' },
+  { id: 5, title: 'Customer Service Representative', department: 'Customer Service', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '1+ years', description: 'Assist clients with inquiries and property viewings.' },
+  { id: 6, title: 'Accountant', department: 'Administration', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '3+ years', description: 'Manage financial records and reporting.' },
+];
 
 const NewsCareerPage = () => {
   // News State
@@ -49,95 +73,42 @@ const NewsCareerPage = () => {
   // Form State
   const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', coverLetter: '', resume: null });
 
-  const newsCategories = ['all', 'Company News', 'Projects', 'Industry Insights', 'Community', 'Awards'];
-  
-  const departments = ['all', 'Construction', 'Sales & Marketing', 'Administration', 'Engineering', 'Customer Service'];
+  // API hooks
+  const { data: newsData } = useNews({ limit: 50 });
+  const { data: careersData } = useCareers({ limit: 50 });
+  const likeMutation = useLikeArticle();
+  const subscribeMutation = useSubscribeNewsletter();
+  const applyMutation = useMutation({
+    mutationFn: ({ jobId, payload }) => careersApi.apply(jobId, payload),
+  });
 
-  const news = [
-    {
-      id: 1,
-      title: 'Omark Real Estate Wins Best Developer Award 2024',
-      excerpt: 'We are proud to announce that Omark Real Estate has been recognized as the Best Real Estate Developer at the Ghana Property Awards 2024 for excellence in residential development.',
-      category: 'Awards',
-      image: '/images/award1.png',
-      date: 'March 15, 2025',
-      author: 'Admin',
-      readTime: '3 min read',
-      views: 1245,
-      featured: true
-    },
-    {
-      id: 2,
-      title: 'Pankrono Gardens Phase 2 Launch Announced',
-      excerpt: 'Due to high demand, we are excited to announce the launch of Phase 2 at Pankrono Gardens with 30 additional luxury homes featuring smart technology.',
-      category: 'Projects',
-      image: '/images/bb.jpeg',
-      date: 'March 10, 2025',
-      author: 'Admin',
-      readTime: '2 min read',
-      views: 892,
-      featured: false
-    },
-    {
-      id: 3,
-      title: 'Affordable Housing Initiative: 500 New Homes',
-      excerpt: 'Omark partners with government to deliver 500 affordable homes for low and middle-income families across the Ashanti Region.',
-      category: 'Company News',
-      image: '/images/bbb.png',
-      date: 'March 5, 2025',
-      author: 'Admin',
-      readTime: '4 min read',
-      views: 2100,
-      featured: false
-    },
-    {
-      id: 4,
-      title: 'Sustainable Building Practices at Omark',
-      excerpt: 'Learn how Omark is leading the way in eco-friendly construction with solar-powered homes and sustainable materials.',
-      category: 'Industry Insights',
-      image: '/images/bbbbb.png',
-      date: 'February 28, 2025',
-      author: 'Admin',
-      readTime: '5 min read',
-      views: 678,
-      featured: false
-    },
-    {
-      id: 5,
-      title: 'Community Outreach: Building Schools in Rural Areas',
-      excerpt: 'Omark continues its commitment to community development with the construction of three new schools in underserved communities.',
-      category: 'Community',
-      image: '/images/c.png',
-      date: 'February 20, 2025',
-      author: 'Admin',
-      readTime: '3 min read',
-      views: 1543,
-      featured: false
-    },
-    {
-      id: 6,
-      title: 'Real Estate Market Outlook 2025',
-      excerpt: 'Expert insights on Ghana\'s real estate market trends, opportunities, and predictions for the coming year.',
-      category: 'Industry Insights',
-      image: '/images/cc.jpeg',
-      date: 'February 15, 2025',
-      author: 'Admin',
-      readTime: '6 min read',
-      views: 987,
-      featured: false
-    }
-  ];
+  const formatDate = (val) => {
+    if (!val) return '';
+    if (/^\d{4}-\d{2}-\d{2}/.test(val)) return new Date(val).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    return val;
+  };
 
-  const jobs = [
-    { id: 1, title: 'Senior Architect', department: 'Engineering', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '5+ years', description: 'Lead architectural design for residential and commercial projects.' },
-    { id: 2, title: 'Project Manager', department: 'Construction', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '7+ years', description: 'Oversee construction projects from planning to completion.' },
-    { id: 3, title: 'Sales Executive', department: 'Sales & Marketing', location: 'Kumasi', type: 'Full-time', salary: 'Base + Commission', experience: '2+ years', description: 'Drive property sales and build client relationships.' },
-    { id: 4, title: 'Civil Engineer', department: 'Engineering', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '3+ years', description: 'Design and supervise civil engineering works.' },
-    { id: 5, title: 'Customer Service Representative', department: 'Customer Service', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '1+ years', description: 'Assist clients with inquiries and property viewings.' },
-    { id: 6, title: 'Accountant', department: 'Administration', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '3+ years', description: 'Manage financial records and reporting.' },
-    { id: 7, title: 'Interior Designer', department: 'Engineering', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '3+ years', description: 'Create stunning interior designs for residential properties.' },
-    { id: 8, title: 'Marketing Coordinator', department: 'Sales & Marketing', location: 'Kumasi', type: 'Full-time', salary: 'Competitive', experience: '2+ years', description: 'Coordinate marketing campaigns and social media presence.' }
-  ];
+  const news = useMemo(() => {
+    const list = Array.isArray(newsData) ? newsData : (newsData?.data ?? null);
+    if (!list || list.length === 0) return STATIC_NEWS;
+    return list.map(a => ({ ...a, id: a.id ?? a._id, excerpt: a.excerpt ?? a.summary ?? a.description ?? '', image: a.image ?? a.imageUrl ?? a.coverImage ?? '', date: formatDate(a.date ?? a.publishedAt ?? a.createdAt ?? ''), readTime: a.readTime ?? a.readingTime ?? '3 min read', views: a.views ?? 0, featured: a.featured ?? a.isFeatured ?? false }));
+  }, [newsData]);
+
+  const jobs = useMemo(() => {
+    const list = Array.isArray(careersData) ? careersData : (careersData?.data ?? null);
+    if (!list || list.length === 0) return STATIC_JOBS;
+    return list.map(j => ({ ...j, id: j.id ?? j._id, department: j.department ?? j.category ?? '', location: j.location ?? j.city ?? 'Kumasi', type: j.type ?? j.employmentType ?? 'Full-time', salary: j.salary ?? j.salaryRange ?? 'Competitive', experience: j.experience ?? j.experienceRequired ?? '', description: j.description ?? j.summary ?? '' }));
+  }, [careersData]);
+
+  const newsCategories = useMemo(() => {
+    const cats = [...new Set(news.map(n => n.category).filter(Boolean))];
+    return ['all', ...cats];
+  }, [news]);
+
+  const departments = useMemo(() => {
+    const depts = [...new Set(jobs.map(j => j.department).filter(Boolean))];
+    return ['all', ...depts];
+  }, [jobs]);
 
   const benefits = [
     { icon: Award, title: 'Career Growth', desc: 'Continuous learning and advancement opportunities' },
@@ -169,9 +140,27 @@ const NewsCareerPage = () => {
   const openApplyModal = (job) => { setSelectedJob(job); setIsModalOpen(true); };
   const closeModal = () => { setIsModalOpen(false); setSelectedJob(null); setFormData({ fullName: '', email: '', phone: '', coverLetter: '', resume: null }); setIsSubmitted(false); };
   const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-  const handleSubmit = (e) => { e.preventDefault(); setIsSubmitted(true); setTimeout(() => closeModal(), 2000); };
-  const toggleLike = (id) => { setLikedPosts(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]); };
-  const handleNewsletterSubscribe = (e) => { e.preventDefault(); if (email) { setIsSubscribed(true); setTimeout(() => setIsSubscribed(false), 3000); setEmail(''); } };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    applyMutation.mutate(
+      { jobId: selectedJob.id, payload: { fullName: formData.fullName, email: formData.email, phone: formData.phone, coverLetter: formData.coverLetter, file: formData.resume } },
+      { onSettled: () => { setIsSubmitted(true); setTimeout(() => closeModal(), 2000); } }
+    );
+  };
+  const toggleLike = (id) => {
+    setLikedPosts(prev => {
+      if (prev.includes(id)) return prev.filter(i => i !== id);
+      likeMutation.mutate(id);
+      return [...prev, id];
+    });
+  };
+  const handleNewsletterSubscribe = (e) => {
+    e.preventDefault();
+    if (!email) return;
+    subscribeMutation.mutate({ email }, {
+      onSettled: () => { setIsSubscribed(true); setTimeout(() => setIsSubscribed(false), 3000); setEmail(''); }
+    });
+  };
 
   return (
     <div className="min-h-screen bg-white">

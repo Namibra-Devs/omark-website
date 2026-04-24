@@ -1,13 +1,13 @@
 // pages/ContactPage.jsx - Premium Redesign
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Clock, 
-  Send, 
-  CheckCircle, 
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Send,
+  CheckCircle,
   ArrowRight,
   MessageCircle,
   Calendar,
@@ -15,52 +15,43 @@ import {
   User,
   Briefcase,
   Star,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
 import VideoBanner from '@/components/VideoBanner';
 import FAQSection from '@/components/FAQSection';
+import { useSubmitContact } from '../hooks/useContact';
+
+const EMPTY_FORM = { firstName: '', lastName: '', email: '', phone: '', interest: 'Residential Property', message: '', preferredContact: 'email' };
 
 const ContactPage = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    interest: 'Residential Property',
-    message: '',
-    preferredContact: 'email'
-  });
-  
+  const [formData, setFormData] = useState(EMPTY_FORM);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const submitContact = useSubmitContact();
+
+  const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    console.log('Form submitted:', formData);
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        interest: 'Residential Property',
-        message: '',
-        preferredContact: 'email'
+    setSubmitError('');
+    try {
+      await submitContact.mutateAsync({
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.interest,
+        message: formData.message,
       });
-    }, 3000);
+      setIsSubmitted(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setFormData(EMPTY_FORM);
+      }, 3000);
+    } catch (err) {
+      setSubmitError(err?.response?.data?.message ?? 'Failed to send message. Please try again.');
+    }
   };
 
   const fadeInUp = {
@@ -442,21 +433,19 @@ const ContactPage = () => {
                       </div>
                     </div>
 
+                    {submitError && (
+                      <p className="text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg">{submitError}</p>
+                    )}
+
                     <button
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={submitContact.isPending}
                       className="w-full bg-[#7B170F] hover:bg-[#14141D] text-white py-3.5 rounded-md cursor-pointer font-semibold transition-all duration-300 shadow-md hover:shadow-xl inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                      {isSubmitting ? (
-                        <>
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          Sending...
-                        </>
+                      {submitContact.isPending ? (
+                        <><Loader2 size={18} className="animate-spin" /> Sending...</>
                       ) : (
-                        <>
-                          <Send size={18} />
-                          Send Message
-                        </>
+                        <><Send size={18} /> Send Message</>
                       )}
                     </button>
 
