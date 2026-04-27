@@ -30,8 +30,8 @@ import {
 
 const EMPTY_FORM = {
   title: "", description: "", date: "", time: "", location: "",
-  category: "", status: "upcoming", features: [], completion: "",
-  tags: [], units: "", size: "", completionDate: "",
+  category: "", status: "upcoming", featured: false, maxAttendees: "",
+  features: [], completion: "", tags: [], units: "", size: "", completionDate: "",
 };
 
 const AdminDashboard = () => {
@@ -111,7 +111,18 @@ const AdminDashboard = () => {
 
   const saveEvent = async () => {
     try {
-      const payload = { ...formData, ...(imageFile ? { image: imageFile } : {}) };
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        date: formData.date,
+        time: formData.time,
+        location: formData.location,
+        category: formData.category,
+        status: formData.status,
+        featured: formData.featured,
+        ...(formData.maxAttendees !== "" ? { maxAttendees: Number(formData.maxAttendees) } : {}),
+        ...(imageFile ? { image: imageFile } : {}),
+      };
       if (editingItem) {
         await updateEvent.mutateAsync({ id: editingItem.id, ...payload });
         showNotification("Event updated successfully!");
@@ -125,7 +136,20 @@ const AdminDashboard = () => {
 
   const saveProject = async () => {
     try {
-      const payload = { ...formData, ...(imageFile ? { image: imageFile } : {}) };
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        category: formData.category,
+        status: formData.status,
+        completion: formData.completion,
+        units: formData.units,
+        size: formData.size,
+        completionDate: formData.completionDate,
+        features: formData.features,
+        featured: formData.featured,
+        ...(imageFile ? { image: imageFile } : {}),
+      };
       if (editingItem) {
         await updateProject.mutateAsync({ id: editingItem.id, ...payload });
         showNotification("Project updated successfully!");
@@ -139,7 +163,12 @@ const AdminDashboard = () => {
 
   const saveGalleryItem = async () => {
     try {
-      const payload = { ...formData, ...(imageFile ? { image: imageFile } : {}) };
+      const payload = {
+        title: formData.title,
+        category: formData.category,
+        tags: formData.tags,
+        ...(imageFile ? { image: imageFile } : {}),
+      };
       if (editingItem) {
         await updateGallery.mutateAsync({ id: editingItem.id, ...payload });
         showNotification("Gallery item updated successfully!");
@@ -280,7 +309,7 @@ const renderContent = () => {
                         </div>
                         <div className="flex items-center gap-1">
                           <Users size={14} />
-                          {event.registrations.length} registered
+                          {event.registrations?.length ?? 0} registered
                         </div>
                       </div>
                     </div>
@@ -300,12 +329,12 @@ const renderContent = () => {
                     </div>
                   </div>
 
-                  {event.registrations.length > 0 && (
+                  {(event.registrations?.length ?? 0) > 0 && (
                     <div className="mt-4 pt-4 border-t border-gray-100">
                       <div className="flex justify-between items-center mb-3 flex-wrap gap-2">
                         <h4 className="font-semibold text-[#14141D] flex items-center gap-2">
                           <Users size={16} />
-                          Registered Attendees ({event.registrations.length})
+                          Registered Attendees ({event.registrations?.length ?? 0})
                         </h4>
                         <button
                           onClick={() => exportRegistrations(event)}
@@ -329,7 +358,7 @@ const renderContent = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {event.registrations.map((reg) => (
+                            {(event.registrations ?? []).map((reg) => (
                               <tr
                                 key={reg.id}
                                 className="border-b border-gray-100"
@@ -835,7 +864,39 @@ const renderContent = () => {
                       <option value="Seminar">Seminar</option>
                       <option value="Workshop">Workshop</option>
                       <option value="Expo">Expo</option>
+                      <option value="Community">Community</option>
+                      <option value="Career Fair">Career Fair</option>
                     </select>
+                    <select
+                      name="status"
+                      value={formData.status}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border rounded-lg"
+                    >
+                      <option value="upcoming">Upcoming</option>
+                      <option value="ongoing">Ongoing</option>
+                      <option value="past">Past</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                    <input
+                      type="number"
+                      name="maxAttendees"
+                      placeholder="Max Attendees (optional)"
+                      value={formData.maxAttendees}
+                      onChange={handleInputChange}
+                      min="1"
+                      className="w-full px-4 py-2 border rounded-lg"
+                    />
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="featured"
+                        checked={!!formData.featured}
+                        onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                        className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                      />
+                      <span className="text-sm text-gray-700 font-medium">Featured event</span>
+                    </label>
                   </>
                 )}
 
@@ -844,11 +905,21 @@ const renderContent = () => {
                     <input
                       type="text"
                       name="location"
-                      placeholder="Location"
+                      placeholder="Location *"
                       value={formData.location}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 border rounded-lg"
                     />
+                    <select
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border rounded-lg"
+                    >
+                      <option value="">Select Category *</option>
+                      <option value="Residential">Residential</option>
+                      <option value="Commercial">Commercial</option>
+                    </select>
                     <select
                       name="status"
                       value={formData.status}
@@ -862,7 +933,7 @@ const renderContent = () => {
                     <input
                       type="text"
                       name="completion"
-                      placeholder="Completion % (e.g., 65%)"
+                      placeholder="Completion % (e.g., 65%) *"
                       value={formData.completion}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 border rounded-lg"
@@ -870,7 +941,7 @@ const renderContent = () => {
                     <input
                       type="text"
                       name="units"
-                      placeholder="Units (e.g., 50 Units)"
+                      placeholder="Units (e.g., 50 Units) *"
                       value={formData.units}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 border rounded-lg"
@@ -878,20 +949,36 @@ const renderContent = () => {
                     <input
                       type="text"
                       name="size"
-                      placeholder="Size (e.g., 5 Acres)"
+                      placeholder="Size (e.g., 5 Acres) *"
                       value={formData.size}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border rounded-lg"
+                    />
+                    <input
+                      type="date"
+                      name="completionDate"
+                      placeholder="Completion Date *"
+                      value={formData.completionDate}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 border rounded-lg"
                     />
                     <input
                       type="text"
                       name="features"
-                      placeholder="Features (comma separated)"
-                      onChange={(e) =>
-                        handleArrayChange("features", e.target.value)
-                      }
+                      placeholder="Features (comma separated) *"
+                      onChange={(e) => handleArrayChange("features", e.target.value)}
                       className="w-full px-4 py-2 border rounded-lg"
                     />
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="featured"
+                        checked={!!formData.featured}
+                        onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                        className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+                      />
+                      <span className="text-sm text-gray-700 font-medium">Featured project</span>
+                    </label>
                   </>
                 )}
 
@@ -958,14 +1045,6 @@ const renderContent = () => {
         )}
       </AnimatePresence>
 
-      <style jsx>{`
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
     </div>
   );
 };
