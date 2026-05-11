@@ -25,16 +25,12 @@ export const projectsApi = {
   },
 
   create: async (payload) => {
-    const { data } = await api.post('/projects', toFormData(payload), {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.post('/projects', toFormData(payload));
     return data.data ?? data;
   },
 
   update: async (id, payload) => {
-    const { data } = await api.put(`/projects/${id}`, toFormData(payload), {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.put(`/projects/${id}`, toFormData(payload));
     return data.data ?? data;
   },
 
@@ -50,9 +46,7 @@ export const projectsApi = {
 
   addGalleryImage: async (id, payload) => {
     const form = toFormData(payload);
-    const { data } = await api.post(`/projects/${id}/gallery`, form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.post(`/projects/${id}/gallery`, form);
     return data.data ?? data;
   },
 

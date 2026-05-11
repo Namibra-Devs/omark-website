@@ -1,4 +1,5 @@
 import api from '../lib/axios';
+import { uploadApi } from './upload';
 
 export const careersApi = {
   list: async (params = {}) => {
@@ -26,14 +27,9 @@ export const careersApi = {
     return data.data ?? data;
   },
 
-  apply: async (id, payload) => {
-    const form = new FormData();
-    Object.entries(payload).forEach(([key, val]) => {
-      if (val !== undefined && val !== null) form.append(key, val);
-    });
-    const { data } = await api.post(`/jobs/${id}/apply`, form, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+  apply: async (id, { fullName, email, phone, coverLetter, resume }) => {
+    const resumeUrl = await uploadApi.file(resume);
+    const { data } = await api.post(`/jobs/${id}/apply`, { fullName, email, phone, coverLetter, resumeUrl });
     return data.data ?? data;
   },
 

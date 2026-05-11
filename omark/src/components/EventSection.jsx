@@ -33,6 +33,7 @@ const EventSection = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cardsPerView, setCardsPerView] = useState(3);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalView, setModalView] = useState('details'); // 'details' | 'register'
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -69,8 +70,18 @@ const EventSection = () => {
   const handlePrev = () => setCurrentIndex(prev => Math.max(0, prev - 1));
   const handleNext = () => setCurrentIndex(prev => Math.min(maxIndex, prev + 1));
 
+  const openDetails = (event) => {
+    setSelectedEvent(event);
+    setModalView('details');
+    setFormData(EMPTY_FORM);
+    setIsSubmitted(false);
+    setSubmitError('');
+    setIsModalOpen(true);
+  };
+
   const openModal = (event) => {
     setSelectedEvent(event);
+    setModalView('register');
     setFormData(EMPTY_FORM);
     setIsSubmitted(false);
     setSubmitError('');
@@ -152,13 +163,21 @@ const EventSection = () => {
                       <span>{getField(featured, 'location', 'venue', 'address')}</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => openModal(featured)}
-                    className="inline-flex items-center gap-2 bg-white text-[#7B170F] px-6 py-2.5 rounded-md font-semibold hover:bg-[#14141D] hover:text-white cursor-pointer transition-all duration-300 shadow-lg"
-                  >
-                    Register Now
-                    <ArrowRight size={18} />
-                  </button>
+                  <div className="flex gap-3 flex-wrap">
+                    <button
+                      onClick={() => openDetails(featured)}
+                      className="inline-flex items-center gap-2 bg-white/10 border border-white text-white px-6 py-2.5 rounded-md font-semibold hover:bg-white hover:text-[#7B170F] cursor-pointer transition-all duration-300"
+                    >
+                      View Details
+                    </button>
+                    <button
+                      onClick={() => openModal(featured)}
+                      className="inline-flex items-center gap-2 bg-white text-[#7B170F] px-6 py-2.5 rounded-md font-semibold hover:bg-[#14141D] hover:text-white cursor-pointer transition-all duration-300 shadow-lg"
+                    >
+                      Register Now
+                      <ArrowRight size={18} />
+                    </button>
+                  </div>
                 </div>
                 <div className="relative h-64 md:h-auto">
                   <img
@@ -238,17 +257,23 @@ const EventSection = () => {
                           {event.description}
                         </p>
 
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
-                            <MapPin size={12} />
-                            <span className="line-clamp-1">{eventLocation}</span>
-                          </div>
+                        <div className="flex items-center gap-1 text-xs text-gray-500 mb-3">
+                          <MapPin size={12} />
+                          <span className="line-clamp-1">{eventLocation}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openDetails(event)}
+                            className="flex-1 border border-[#7B170F] text-[#7B170F] hover:bg-[#7B170F] hover:text-white text-sm font-semibold py-2 rounded-md cursor-pointer transition-all duration-200"
+                          >
+                            View Details
+                          </button>
                           <button
                             onClick={() => openModal(event)}
-                            className="text-[#7B170F] font-semibold text-sm hover:text-[#14141D] cursor-pointer transition-all inline-flex items-center gap-1"
+                            className="flex-1 bg-[#7B170F] text-white hover:bg-[#14141D] text-sm font-semibold py-2 rounded-md cursor-pointer transition-all duration-200 inline-flex items-center justify-center gap-1"
                           >
                             Register
-                            <ArrowRight size={14} />
+                            <ArrowRight size={13} />
                           </button>
                         </div>
                       </div>
@@ -274,114 +299,216 @@ const EventSection = () => {
       {isModalOpen && selectedEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={closeModal}>
           <div className="relative bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="sticky top-0 bg-white z-10 flex justify-between items-center p-6 border-b border-gray-100">
-              <div>
-                <h3 className="text-xl font-bold text-[#14141D]">Register for Event</h3>
-                <p className="text-sm text-gray-500">{selectedEvent.title}</p>
-              </div>
-              <button onClick={closeModal} className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 transition-colors cursor-pointer">
-                <X size={20} className="text-gray-600" />
-              </button>
-            </div>
 
-            {isSubmitted ? (
-              <div className="p-8 text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle size={32} className="text-green-600" />
+            {/* ── DETAILS VIEW ── */}
+            {modalView === 'details' && (
+              <>
+                {/* Hero image */}
+                <div className="relative h-56 sm:h-72 overflow-hidden rounded-t-2xl">
+                  <img
+                    src={getField(selectedEvent, 'image', 'imageUrl', 'thumbnail')}
+                    alt={selectedEvent.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.src = 'https://placehold.co/800x500/e5e7eb/6b7280?text=Event'; }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <button
+                    onClick={closeModal}
+                    className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 text-white transition-colors cursor-pointer"
+                  >
+                    <X size={18} />
+                  </button>
+                  <div className="absolute bottom-4 left-5">
+                    <span className="inline-block bg-[#7B170F] text-white px-3 py-1 rounded-full text-xs font-semibold mb-2">
+                      {selectedEvent.category}
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white leading-snug">
+                      {selectedEvent.title}
+                    </h3>
+                  </div>
                 </div>
-                <h4 className="text-2xl font-bold text-[#14141D] mb-2">Registration Successful!</h4>
-                <p className="text-gray-600">
-                  Thank you for registering for <strong>{selectedEvent.title}</strong>.
-                  We will send a confirmation email with event details shortly.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                <div className="bg-red-50 rounded-xl p-4 mb-4">
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar size={14} className="text-[#7B170F]" />
+
+                <div className="p-6 space-y-5">
+                  {/* Meta pills */}
+                  <div className="flex flex-wrap gap-3">
+                    <div className="flex items-center gap-2 bg-red-50 text-[#7B170F] px-3 py-1.5 rounded-lg text-sm">
+                      <Calendar size={14} />
                       <span>{formatDate(getField(selectedEvent, 'date', 'startDate', 'eventDate'))}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Clock size={14} className="text-[#7B170F]" />
-                      <span>{getField(selectedEvent, 'time', 'startTime', 'eventTime')}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600 col-span-2">
-                      <MapPin size={14} className="text-[#7B170F]" />
-                      <span>{getField(selectedEvent, 'location', 'venue', 'address')}</span>
-                    </div>
+                    {getField(selectedEvent, 'time', 'startTime', 'eventTime') && (
+                      <div className="flex items-center gap-2 bg-red-50 text-[#7B170F] px-3 py-1.5 rounded-lg text-sm">
+                        <Clock size={14} />
+                        <span>{getField(selectedEvent, 'time', 'startTime', 'eventTime')}</span>
+                      </div>
+                    )}
+                    {getField(selectedEvent, 'location', 'venue', 'address') && (
+                      <div className="flex items-center gap-2 bg-red-50 text-[#7B170F] px-3 py-1.5 rounded-lg text-sm">
+                        <MapPin size={14} />
+                        <span>{getField(selectedEvent, 'location', 'venue', 'address')}</span>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Capacity bar */}
                   {selectedEvent.maxAttendees != null && selectedEvent.currentRegistrations != null && (
-                    <div className="mt-3 pt-3 border-t border-red-200">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Spots Available:</span>
-                        <span className="font-semibold text-red-600">
-                          {selectedEvent.maxAttendees - selectedEvent.currentRegistrations} remaining
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <div className="flex justify-between text-sm mb-2">
+                        <span className="text-gray-600 font-medium">Spots Remaining</span>
+                        <span className="font-bold text-[#7B170F]">
+                          {Math.max(0, selectedEvent.maxAttendees - selectedEvent.currentRegistrations)} / {selectedEvent.maxAttendees}
                         </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-[#7B170F] h-2 rounded-full transition-all"
+                          style={{ width: `${Math.min(100, (selectedEvent.currentRegistrations / selectedEvent.maxAttendees) * 100)}%` }}
+                        />
                       </div>
                     </div>
                   )}
-                </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input type="text" name="fullName" required value={formData.fullName} onChange={handleChange} className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter your full name" />
+                  {/* Description */}
+                  <div>
+                    <h4 className="text-base font-bold text-[#14141D] mb-2">About This Event</h4>
+                    <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                      {getField(selectedEvent, 'fullDescription', 'description', 'summary') || 'No description available.'}
+                    </p>
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input type="email" name="email" required value={formData.email} onChange={handleChange} className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="you@example.com" />
+                  {/* CTA */}
+                  <button
+                    onClick={() => setModalView('register')}
+                    className="w-full bg-[#7B170F] hover:bg-[#14141D] text-white py-3 rounded-md font-semibold transition-all duration-300 inline-flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    Register Now
+                    <ArrowRight size={18} />
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* ── REGISTER VIEW ── */}
+            {modalView === 'register' && (
+              <>
+                <div className="sticky top-0 bg-white z-10 flex justify-between items-center p-6 border-b border-gray-100">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setModalView('details')}
+                        className="text-gray-400 hover:text-[#7B170F] transition-colors cursor-pointer"
+                        title="Back to details"
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                      <h3 className="text-xl font-bold text-[#14141D]">Register for Event</h3>
+                    </div>
+                    <p className="text-sm text-gray-500 ml-7">{selectedEvent.title}</p>
                   </div>
+                  <button onClick={closeModal} className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 hover:bg-red-100 transition-colors cursor-pointer">
+                    <X size={20} className="text-gray-600" />
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input type="tel" name="phone" required value={formData.phone} onChange={handleChange} className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="+233 XX XXX XXXX" />
+                {isSubmitted ? (
+                  <div className="p-8 text-center">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle size={32} className="text-green-600" />
+                    </div>
+                    <h4 className="text-2xl font-bold text-[#14141D] mb-2">Registration Successful!</h4>
+                    <p className="text-gray-600">
+                      Thank you for registering for <strong>{selectedEvent.title}</strong>.
+                      We will send a confirmation email with event details shortly.
+                    </p>
                   </div>
-                </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                    <div className="bg-red-50 rounded-xl p-4 mb-4">
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <Calendar size={14} className="text-[#7B170F]" />
+                          <span>{formatDate(getField(selectedEvent, 'date', 'startDate', 'eventDate'))}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <Clock size={14} className="text-[#7B170F]" />
+                          <span>{getField(selectedEvent, 'time', 'startTime', 'eventTime')}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600 col-span-2">
+                          <MapPin size={14} className="text-[#7B170F]" />
+                          <span>{getField(selectedEvent, 'location', 'venue', 'address')}</span>
+                        </div>
+                      </div>
+                      {selectedEvent.maxAttendees != null && selectedEvent.currentRegistrations != null && (
+                        <div className="mt-3 pt-3 border-t border-red-200">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Spots Available:</span>
+                            <span className="font-semibold text-red-600">
+                              {selectedEvent.maxAttendees - selectedEvent.currentRegistrations} remaining
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Number of Guests (including you)</label>
-                  <select name="numberOfGuests" value={formData.numberOfGuests} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                    {[1, 2, 3, 4, 5].map(num => (
-                      <option key={num} value={num}>{num} {num === 1 ? 'person' : 'people'}</option>
-                    ))}
-                  </select>
-                </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input type="text" name="fullName" required value={formData.fullName} onChange={handleChange} className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Enter your full name" />
+                      </div>
+                    </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Special Requests (Optional)</label>
-                  <textarea name="specialRequests" rows={2} value={formData.specialRequests} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Dietary restrictions, accessibility needs, etc." />
-                </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input type="email" name="email" required value={formData.email} onChange={handleChange} className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="you@example.com" />
+                      </div>
+                    </div>
 
-                {submitError && (
-                  <p className="text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg">{submitError}</p>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input type="tel" name="phone" required value={formData.phone} onChange={handleChange} className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="+233 XX XXX XXXX" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Number of Guests (including you)</label>
+                      <select name="numberOfGuests" value={formData.numberOfGuests} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                        {[1, 2, 3, 4, 5].map(num => (
+                          <option key={num} value={num}>{num} {num === 1 ? 'person' : 'people'}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Special Requests (Optional)</label>
+                      <textarea name="specialRequests" rows={2} value={formData.specialRequests} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="Dietary restrictions, accessibility needs, etc." />
+                    </div>
+
+                    {submitError && (
+                      <p className="text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg">{submitError}</p>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={registerMutation.isPending}
+                      className="w-full bg-[#7B170F] hover:bg-[#14141D] text-white py-3 rounded-md cursor-pointer font-semibold transition-all duration-300 shadow-md hover:shadow-xl inline-flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {registerMutation.isPending ? (
+                        <><Loader2 size={18} className="animate-spin" /> Submitting...</>
+                      ) : (
+                        <>Complete Registration <Send size={18} /></>
+                      )}
+                    </button>
+
+                    <p className="text-xs text-gray-500 text-center">
+                      By registering, you agree to our event terms and conditions. You will receive a confirmation email.
+                    </p>
+                  </form>
                 )}
-
-                <button
-                  type="submit"
-                  disabled={registerMutation.isPending}
-                  className="w-full bg-[#7B170F] hover:bg-[#14141D] text-white py-3 rounded-md cursor-pointer font-semibold transition-all duration-300 shadow-md hover:shadow-xl inline-flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {registerMutation.isPending ? (
-                    <><Loader2 size={18} className="animate-spin" /> Submitting...</>
-                  ) : (
-                    <>Complete Registration <Send size={18} /></>
-                  )}
-                </button>
-
-                <p className="text-xs text-gray-500 text-center">
-                  By registering, you agree to our event terms and conditions. You will receive a confirmation email.
-                </p>
-              </form>
+              </>
             )}
           </div>
         </div>

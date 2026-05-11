@@ -3,10 +3,8 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNews, useLikeArticle } from '../hooks/useNews';
-import { useSubscribeNewsletter } from '../hooks/useNewsletter';
 import {
   Calendar,
-  User,
   ArrowRight,
   Search,
   Filter,
@@ -14,12 +12,7 @@ import {
   Clock,
   Eye,
   Heart,
-  Mail,
-  Send,
   CheckCircle,
-  Tag,
-  Share2,
-  Loader2
 } from 'lucide-react';
 import VideoBanner from '@/components/VideoBanner';
 
@@ -125,12 +118,9 @@ const NewsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [likedPosts, setLikedPosts] = useState([]);
-  const [email, setEmail] = useState('');
-  const [isSubscribed, setIsSubscribed] = useState(false);
 
   const { data: newsData } = useNews({ limit: 50 });
   const likeMutation = useLikeArticle();
-  const subscribeMutation = useSubscribeNewsletter();
 
   const news = useMemo(() => {
     const list = Array.isArray(newsData) ? newsData : (newsData?.data ?? null);
@@ -141,17 +131,6 @@ const NewsPage = () => {
     const cats = [...new Set(news.map(n => n.category).filter(Boolean))];
     return ['all', ...cats];
   }, [news]);
-
-  const handleSubscribe = async (e) => {
-    e.preventDefault();
-    if (!email) return;
-    try {
-      await subscribeMutation.mutateAsync({ email });
-    } catch (_) {}
-    setIsSubscribed(true);
-    setTimeout(() => setIsSubscribed(false), 3000);
-    setEmail('');
-  };
 
   const toggleLike = (id) => {
     setLikedPosts(prev => {
@@ -360,7 +339,7 @@ const NewsPage = () => {
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredNews.filter(n => !n.featured).map((item, index) => (
+                {filteredNews.filter(n => n.id !== featuredNews?.id).map((item, index) => (
                   <motion.div 
                     key={item.id} 
                     initial={{ opacity: 0, y: 20 }} 
@@ -408,15 +387,6 @@ const NewsPage = () => {
       </section>
 
     <VideoBanner/>
-
-      {/* Success Toast */}
-      <AnimatePresence>
-        {isSubscribed && (
-          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} className="fixed bottom-6 right-6 z-50 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
-            <CheckCircle size={18} /> Subscribed successfully!
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

@@ -2,7 +2,8 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEvents } from "../hooks/useEvents";
+import { useEvents, useEventRegistrations } from "../hooks/useEvents";
+import { eventsApi } from "../api/events";
 import {
   Calendar,
   MapPin,
@@ -12,14 +13,8 @@ import {
   Filter,
   ChevronDown,
   ArrowRight,
-  Star,
-  User,
-  Mail,
-  Phone,
   Download,
   Eye,
-  ChevronLeft,
-  ChevronRight,
   X,
 } from "lucide-react";
 
@@ -93,6 +88,106 @@ const normalizeEvent = (e) => ({
   registrations: Array.isArray(e.registrations) ? e.registrations : [],
 });
 
+const regCount = (e) =>
+  e.currentRegistrations ?? e.registrationCount ?? e.registrationsCount ??
+  e.totalRegistrations ?? e._count?.registrations ?? e.registrations?.length ?? 0;
+
+const flattenRegs = (data) => {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  return data.data ?? data.registrations ?? [];
+};
+
+const AttendeesModal = ({ event, onClose }) => {
+  const { data, isLoading } = useEventRegistrations(event?.id);
+  const regs = flattenRegs(data);
+  const filename = `${(event?.title ?? 'event').replace(/\s+/g, '_')}_attendees.csv`;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-white rounded-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex justify-between items-center">
+          <div>
+            <h3 className="text-xl font-bold text-[#14141D]">{event?.title}</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              {isLoading ? 'Loading...' : `${regs.length} registered attendees`}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => eventsApi.exportRegistrationsCsv(event.id, filename)}
+              className="flex items-center gap-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition cursor-pointer"
+            >
+              <Download size={16} />
+              Export CSV
+            </button>
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-y-auto p-6">
+          {isLoading ? (
+            <div className="text-center py-12">
+              <div className="w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="mt-3 text-gray-500 text-sm">Loading attendees...</p>
+            </div>
+          ) : regs.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-gray-500 uppercase border-b border-gray-100">
+                    <th className="pb-2 pr-4">Name</th>
+                    <th className="pb-2 pr-4">Email</th>
+                    <th className="pb-2 pr-4">Phone</th>
+                    <th className="pb-2 pr-4 text-center">Guests</th>
+                    <th className="pb-2">Registered</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {regs.map((r, i) => (
+                    <tr key={r.id ?? r._id ?? i} className="border-b border-gray-50 hover:bg-gray-50">
+                      <td className="py-3 pr-4 font-medium text-[#14141D]">{r.fullName ?? r.name ?? '—'}</td>
+                      <td className="py-3 pr-4 text-gray-600">{r.email ?? '—'}</td>
+                      <td className="py-3 pr-4 text-gray-600">{r.phone ?? '—'}</td>
+                      <td className="py-3 pr-4 text-center">{r.guests ?? r.numberOfGuests ?? 0}</td>
+                      <td className="py-3 text-gray-400 text-xs">
+                        {r.createdAt ? new Date(r.createdAt).toLocaleDateString() : r.registeredAt ?? '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">👥</div>
+              <p className="text-gray-500">No attendees registered for this event yet</p>
+            </div>
+          )}
+        </div>
+
+        <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 text-center">
+          <p className="text-xs text-gray-500">Total: {regs.length} attendees</p>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
 const AllEventsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -137,25 +232,6 @@ const AllEventsPage = () => {
     setSelectedEvent(null);
   };
 
-  const exportRegistrations = (event) => {
-    const headers = ["Name", "Email", "Phone", "Guests", "Registered Date"];
-    const rows = event.registrations.map((r) => [
-      r.name,
-      r.email,
-      r.phone,
-      r.guests,
-      r.registeredAt,
-    ]);
-    const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${event.title.replace(/\s/g, "_")}_attendees.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
   const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -180,10 +256,7 @@ const AllEventsPage = () => {
     }
   };
 
-  const totalRegistrations = events.reduce(
-    (sum, event) => sum + (event.registrations?.length || 0),
-    0,
-  );
+  const totalRegistrations = events.reduce((sum, event) => sum + regCount(event), 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -430,67 +503,33 @@ const AllEventsPage = () => {
                             className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md cursor-pointer text-sm font-semibold transition-all"
                           >
                             <Eye size={16} />
-                            View {event.registrations?.length || 0} Attendees
+                            View {regCount(event)} Attendees
                           </button>
                         </div>
                       </div>
                     </div>
 
                     {/* Attendees Preview */}
-                    {event.registrations && event.registrations.length > 0 ? (
-                      <div className="p-6">
-                        <div className="flex justify-between items-center mb-4">
-                          <h4 className="font-semibold text-[#14141D] flex items-center gap-2">
-                            <Users size={16} />
-                            Recent Attendees
-                          </h4>
-                          <button
-                            onClick={() => exportRegistrations(event)}
-                            className="flex items-center gap-1 text-sm text-red-600 hover:text-red-700 transition-colors cursor-pointer"
-                          >
-                            <Download size={14} />
-                            Export CSV
-                          </button>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                          {event.registrations.slice(0, 3).map((attendee) => (
-                            <div
-                              key={attendee.id}
-                              className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
-                            >
-                              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                                <User size={16} className="text-red-600" />
-                              </div>
-                              <div className="flex-1">
-                                <p className="font-semibold text-sm text-[#14141D]">
-                                  {attendee.name}
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                  {attendee.email}
-                                </p>
-                              </div>
-                              <div className="text-xs text-gray-400">
-                                {attendee.guests} guest
-                                {attendee.guests !== 1 ? "s" : ""}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        {event.registrations.length > 3 && (
-                          <button
-                            onClick={() => openAttendeesModal(event)}
-                            className="mt-3 text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-1 cursor-pointer"
-                          >
-                            View all {event.registrations.length} attendees
-                            <ArrowRight size={14} />
-                          </button>
-                        )}
+                    {regCount(event) > 0 ? (
+                      <div className="px-6 pb-5 flex items-center justify-between">
+                        <button
+                          onClick={() => openAttendeesModal(event)}
+                          className="text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-1 cursor-pointer"
+                        >
+                          View all {regCount(event)} attendees
+                          <ArrowRight size={14} />
+                        </button>
+                        <button
+                          onClick={() => eventsApi.exportRegistrationsCsv(event.id, `${event.title.replace(/\s+/g, '_')}_attendees.csv`)}
+                          className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
+                        >
+                          <Download size={14} />
+                          Export CSV
+                        </button>
                       </div>
                     ) : (
-                      <div className="p-6 text-center">
-                        <div className="text-gray-400 text-sm">
-                          No attendees registered yet
-                        </div>
+                      <div className="px-6 pb-5 text-center">
+                        <div className="text-gray-400 text-sm">No attendees registered yet</div>
                       </div>
                     )}
                   </motion.div>
@@ -504,108 +543,7 @@ const AllEventsPage = () => {
       {/* Attendees Modal */}
       <AnimatePresence>
         {isModalOpen && selectedEvent && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-            onClick={closeModal}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex justify-between items-center">
-                <div>
-                  <h3 className="text-xl font-bold text-[#14141D]">
-                    {selectedEvent.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {selectedEvent.registrations?.length || 0} registered
-                    attendees
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => exportRegistrations(selectedEvent)}
-                    className="flex items-center gap-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition cursor-pointer"
-                  >
-                    <Download size={16} />
-                    Export CSV
-                  </button>
-                  <button
-                    onClick={closeModal}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Modal Body - Attendees List */}
-              <div className="overflow-y-auto p-6">
-                {selectedEvent.registrations &&
-                selectedEvent.registrations.length > 0 ? (
-                  <div className="space-y-3">
-                    {selectedEvent.registrations.map((attendee, idx) => (
-                      <div
-                        key={attendee.id}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                            <User size={20} className="text-red-600" />
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-[#14141D]">
-                              {attendee.name}
-                            </h4>
-                            <div className="flex flex-wrap gap-3 text-xs text-gray-500 mt-1">
-                              <div className="flex items-center gap-1">
-                                <Mail size={12} />
-                                {attendee.email}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Phone size={12} />
-                                {attendee.phone}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-semibold text-red-600">
-                            {attendee.guests} guest
-                            {attendee.guests !== 1 ? "s" : ""}
-                          </div>
-                          <div className="text-xs text-gray-400 mt-1">
-                            Registered: {attendee.registeredAt}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">👥</div>
-                    <p className="text-gray-500">
-                      No attendees registered for this event yet
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Modal Footer */}
-              <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 text-center">
-                <p className="text-xs text-gray-500">
-                  Total: {selectedEvent.registrations?.length || 0} attendees
-                </p>
-              </div>
-            </motion.div>
-          </motion.div>
+          <AttendeesModal event={selectedEvent} onClose={closeModal} />
         )}
       </AnimatePresence>
 

@@ -25,9 +25,7 @@ export const galleryApi = {
   },
 
   create: async (payload) => {
-    const { data } = await api.post('/gallery', toFormData(payload), {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.post('/gallery', toFormData(payload));
     return data.data ?? data;
   },
 
@@ -37,9 +35,7 @@ export const galleryApi = {
   },
 
   update: async (id, payload) => {
-    const { data } = await api.put(`/gallery/${id}`, toFormData(payload), {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.put(`/gallery/${id}`, toFormData(payload));
     return data.data ?? data;
   },
 

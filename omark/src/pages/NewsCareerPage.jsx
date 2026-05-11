@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ContactSection from '../components/ContactSection';
 import { useNews, useLikeArticle } from '../hooks/useNews';
-import { useSubscribeNewsletter } from '../hooks/useNewsletter';
 import { useCareers } from '../hooks/useCareers';
 import { careersApi } from '../api/careers';
 import { useMutation } from '@tanstack/react-query';
@@ -66,18 +65,14 @@ const NewsCareerPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   
-  // Newsletter State
-  const [email, setEmail] = useState('');
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  
   // Form State
   const [formData, setFormData] = useState({ fullName: '', email: '', phone: '', coverLetter: '', resume: null });
+  const [applyError, setApplyError] = useState('');
 
   // API hooks
   const { data: newsData } = useNews({ limit: 50 });
   const { data: careersData } = useCareers({ limit: 50 });
   const likeMutation = useLikeArticle();
-  const subscribeMutation = useSubscribeNewsletter();
   const applyMutation = useMutation({
     mutationFn: ({ jobId, payload }) => careersApi.apply(jobId, payload),
   });
@@ -138,13 +133,23 @@ const NewsCareerPage = () => {
 
   // Career Functions
   const openApplyModal = (job) => { setSelectedJob(job); setIsModalOpen(true); };
-  const closeModal = () => { setIsModalOpen(false); setSelectedJob(null); setFormData({ fullName: '', email: '', phone: '', coverLetter: '', resume: null }); setIsSubmitted(false); };
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedJob(null);
+    setFormData({ fullName: '', email: '', phone: '', coverLetter: '', resume: null });
+    setIsSubmitted(false);
+    setApplyError('');
+  };
   const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleSubmit = (e) => {
     e.preventDefault();
+    setApplyError('');
     applyMutation.mutate(
-      { jobId: selectedJob.id, payload: { fullName: formData.fullName, email: formData.email, phone: formData.phone, coverLetter: formData.coverLetter, file: formData.resume } },
-      { onSettled: () => { setIsSubmitted(true); setTimeout(() => closeModal(), 2000); } }
+      { jobId: selectedJob.id, payload: { fullName: formData.fullName, email: formData.email, phone: formData.phone, coverLetter: formData.coverLetter, resume: formData.resume } },
+      {
+        onSuccess: () => { setIsSubmitted(true); setTimeout(() => closeModal(), 2500); },
+        onError: (err) => setApplyError(err?.response?.data?.message ?? 'Submission failed. Please try again.'),
+      }
     );
   };
   const toggleLike = (id) => {
@@ -154,14 +159,6 @@ const NewsCareerPage = () => {
       return [...prev, id];
     });
   };
-  const handleNewsletterSubscribe = (e) => {
-    e.preventDefault();
-    if (!email) return;
-    subscribeMutation.mutate({ email }, {
-      onSettled: () => { setIsSubscribed(true); setTimeout(() => setIsSubscribed(false), 3000); setEmail(''); }
-    });
-  };
-
   return (
     <div className="min-h-screen bg-white">
     {/* Hero Section */}
@@ -306,7 +303,7 @@ const NewsCareerPage = () => {
             <div className="text-center py-12"><div className="text-6xl mb-4">📰</div><h3 className="text-xl font-semibold text-gray-700">No news found</h3></div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredNews.filter(n => !n.featured).map((item) => (
+              {filteredNews.filter(n => n.id !== featuredNews?.id).map((item) => (
                 <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all group">
                   <div className="relative h-56 overflow-hidden">
                     <img 
@@ -446,16 +443,19 @@ const NewsCareerPage = () => {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                  <input type="text" name="fullName" placeholder="Full Name" required onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg" />
-                  <input type="email" name="email" placeholder="Email Address" required onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg" />
-                  <input type="tel" name="phone" placeholder="Phone Number" required onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg" />
-                  <textarea name="coverLetter" rows={4} placeholder="Cover Letter / Why you're a good fit" required onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg" />
+                  {applyError && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">{applyError}</div>
+                  )}
+                  <input type="text" name="fullName" placeholder="Full Name *" value={formData.fullName} required onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
+                  <input type="email" name="email" placeholder="Email Address *" value={formData.email} required onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
+                  <input type="tel" name="phone" placeholder="Phone Number *" value={formData.phone} required onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
+                  <textarea name="coverLetter" rows={4} placeholder="Cover Letter / Why you're a good fit *" value={formData.coverLetter} required onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500" />
                   <div>
-                    <label className="block text-sm font-medium mb-1">Upload Resume (PDF)</label>
-                    <input type="file" accept=".pdf" required onChange={(e) => setFormData({ ...formData, resume: e.target.files[0] })} className="w-full" />
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Resume (PDF) *</label>
+                    <input type="file" accept=".pdf,.doc,.docx" required onChange={(e) => setFormData({ ...formData, resume: e.target.files[0] ?? null })} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-red-50 file:text-red-700 hover:file:bg-red-100" />
                   </div>
-                  <button type="submit" className="w-full bg-red-700 hover:bg-red-800 cursor-pointer text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2">
-                    Submit Application <Send size={16} />
+                  <button type="submit" disabled={applyMutation.isPending} className="w-full bg-red-700 hover:bg-red-800 cursor-pointer text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+                    {applyMutation.isPending ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Submitting...</> : <>Submit Application <Send size={16} /></>}
                   </button>
                 </form>
               )}
@@ -466,14 +466,6 @@ const NewsCareerPage = () => {
 
 <ContactSection />
 
-      {/* Success Toast */}
-      <AnimatePresence>
-        {isSubscribed && (
-          <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} className="fixed bottom-6 right-6 z-50 bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
-            <CheckCircle size={18} /> Subscribed successfully!
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

@@ -30,16 +30,12 @@ export const eventsApi = {
   },
 
   create: async (payload) => {
-    const { data } = await api.post('/events', toFormData(payload), {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.post('/events', toFormData(payload));
     return data.data ?? data;
   },
 
   update: async (id, payload) => {
-    const { data } = await api.put(`/events/${id}`, toFormData(payload), {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.put(`/events/${id}`, toFormData(payload));
     return data.data ?? data;
   },
 
@@ -63,6 +59,15 @@ export const eventsApi = {
     return data.data ?? data;
   },
 
-  exportRegistrationsCsv: (id) =>
-    `${api.defaults.baseURL}/events/${id}/registrations/export`,
+  exportRegistrationsCsv: async (id, filename = 'registrations.csv') => {
+    const { data } = await api.get(`/events/${id}/registrations/export`, {
+      responseType: 'blob',
+    });
+    const url = URL.createObjectURL(new Blob([data]));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
 };

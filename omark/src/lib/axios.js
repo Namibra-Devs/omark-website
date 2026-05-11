@@ -4,7 +4,6 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'http://tneb405gqjxajlpxnc5c1sx
 
 export const api = axios.create({
   baseURL: BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
 });
 
 const getAccessToken = () => localStorage.getItem('accessToken');

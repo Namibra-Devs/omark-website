@@ -21,16 +21,12 @@ export const newsApi = {
   },
 
   create: async (payload) => {
-    const { data } = await api.post('/news', toFormData(payload), {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.post('/news', toFormData(payload));
     return data.data ?? data;
   },
 
   update: async (id, payload) => {
-    const { data } = await api.put(`/news/${id}`, toFormData(payload), {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await api.put(`/news/${id}`, toFormData(payload));
     return data.data ?? data;
   },
 

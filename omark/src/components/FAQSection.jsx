@@ -16,7 +16,7 @@ const STATIC_FAQS = [
 
 const FAQSection = () => {
   const [openQuestions, setOpenQuestions] = useState([]);
-  const { data: faqData, isLoading } = useFaqs({ enabled: false });
+  const { data: faqData, isLoading } = useFaqs();
 
   const faqs = (() => {
     if (!faqData) return STATIC_FAQS;

@@ -38,10 +38,11 @@ const ContactPage = () => {
     setSubmitError('');
     try {
       await submitContact.mutateAsync({
-        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         email: formData.email,
         phone: formData.phone,
-        subject: formData.interest,
+        interest: formData.interest,
         message: formData.message,
       });
       setIsSubmitted(true);
