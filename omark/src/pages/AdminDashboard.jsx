@@ -13,6 +13,7 @@ import { usePrograms, useCreateProgram, useUpdateProgram, useDeleteProgram } fro
 import { authApi } from "../api/auth";
 import { eventsApi } from "../api/events";
 import { careersApi } from "../api/careers";
+import { projectsApi } from "../api/projects";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar,
@@ -42,7 +43,18 @@ import {
   Star,
   BookOpen,
   ChevronDown,
+  Layers,
 } from "lucide-react";
+
+const DEFAULT_HERO_CONTENT = {
+  title: 'Redefining',
+  highlight: 'Homeownership',
+  subtitle: 'Premium Real Estate & Construction — From Kumasi to the nation, we build dignity, security, and prosperity for every Ghanaian.',
+  btn1Text: 'Explore Projects',
+  btn1Link: '/projects',
+  btn2Text: 'Get Consultation',
+  btn2Link: '/contact',
+};
 
 const EMPTY_FORM = {
   // shared
@@ -130,9 +142,19 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [notification, setNotification] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+  const [galleryFiles, setGalleryFiles] = useState([]);
+  const [galleryPreviews, setGalleryPreviews] = useState([]);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [viewingContact, setViewingContact] = useState(null);
   const [expandedEventId, setExpandedEventId] = useState(null);
+  const [heroContent, setHeroContent] = useState(() => {
+    try {
+      const saved = localStorage.getItem('hero_content');
+      return saved ? { ...DEFAULT_HERO_CONTENT, ...JSON.parse(saved) } : DEFAULT_HERO_CONTENT;
+    } catch {
+      return DEFAULT_HERO_CONTENT;
+    }
+  });
 
   const user = (() => {
     try { return JSON.parse(localStorage.getItem("user")) || { name: "Admin", email: "" }; }
@@ -147,6 +169,7 @@ const AdminDashboard = () => {
   const { data: eventsData } = useEvents({ page: 1, limit: 100 });
   const { data: projectsData } = useProjects({ page: 1, limit: 100 });
   const { data: galleryData } = useGallery({ page: 1, limit: 100 });
+  const { data: heroGalleryData } = useGallery({ category: 'Hero', limit: 20 });
   const { data: newsData } = useNews({ page: 1, limit: 100 });
   const { data: careersData } = useCareers({ page: 1, limit: 100 });
   const { data: contactsData } = useContactMessages({ page: 1, limit: 100 });
@@ -199,6 +222,11 @@ const AdminDashboard = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  const saveHeroContent = () => {
+    localStorage.setItem('hero_content', JSON.stringify(heroContent));
+    showNotification('Hero content saved! Refresh the homepage to see changes.');
+  };
+
   const handleLogout = async () => {
     await authApi.logout();
     navigate("/login");
@@ -226,7 +254,14 @@ const AdminDashboard = () => {
     setIsModalOpen(true);
   };
 
-  const closeModal = () => { setIsModalOpen(false); setEditingItem(null); setImageFile(null); };
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingItem(null);
+    setImageFile(null);
+    galleryPreviews.forEach(url => URL.revokeObjectURL(url));
+    setGalleryFiles([]);
+    setGalleryPreviews([]);
+  };
 
   // ── Save functions ──────────────────────────────────────────
 
@@ -260,12 +295,18 @@ const AdminDashboard = () => {
         featured: formData.featured,
         ...(imageFile ? { image: imageFile } : {}),
       };
+      let projectId;
       if (editingItem) {
         await updateProject.mutateAsync({ id: editingItem.id, ...payload });
+        projectId = editingItem.id ?? editingItem._id;
         showNotification("Project updated!");
       } else {
-        await createProject.mutateAsync(payload);
+        const created = await createProject.mutateAsync(payload);
+        projectId = created?.id ?? created?._id;
         showNotification("Project added!");
+      }
+      if (galleryFiles.length > 0 && projectId) {
+        await Promise.all(galleryFiles.map(f => projectsApi.addGalleryImage(projectId, { image: f })));
       }
       closeModal();
     } catch { showNotification("Failed to save project.", "warning"); }
@@ -506,7 +547,10 @@ const AdminDashboard = () => {
 
   // ── Sidebar ───────────────────────────────────────────────
 
+  const heroImages = Array.isArray(heroGalleryData) ? heroGalleryData : (heroGalleryData?.data ?? []);
+
   const sidebarItems = [
+    { id: "hero", label: "Hero Slider", icon: Layers },
     { id: "events", label: "Events", icon: Calendar, badge: stats.totalRegistrations },
     { id: "projects", label: "Projects", icon: Home },
     { id: "gallery", label: "Gallery", icon: Image },
@@ -522,6 +566,162 @@ const AdminDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+
+      // ── HERO SLIDER ───────────────────────────────────────
+      case "hero":
+        return (
+          <div>
+            <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-[#14141D]">Hero Slider Images</h2>
+                <p className="text-sm text-gray-500 mt-1">Images uploaded here appear in the homepage hero slider. Drag to reorder (coming soon).</p>
+              </div>
+              <label className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-5 py-2.5 rounded-md cursor-pointer transition-all shadow-md">
+                <Upload size={18} /> Upload Image
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      await createGallery.mutateAsync({ title: file.name.replace(/\.[^.]+$/, ''), category: 'Hero', image: file });
+                      showNotification('Hero image uploaded!');
+                    } catch {
+                      showNotification('Upload failed.', 'warning');
+                    }
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+            </div>
+
+            {heroImages.length === 0 ? (
+              <div className="text-center py-20 text-gray-400">
+                <Layers size={48} className="mx-auto mb-4 opacity-30" />
+                <p className="font-medium">No hero images yet</p>
+                <p className="text-sm mt-1">Upload images above — they will appear in the homepage slider immediately.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {heroImages.map((img, idx) => {
+                  const src = img.imageUrl ?? img.url ?? img.image ?? '';
+                  return (
+                    <div key={img.id ?? img._id ?? idx} className="relative group rounded-2xl overflow-hidden shadow-md bg-gray-100 aspect-video">
+                      <img
+                        src={src}
+                        alt={img.title ?? `Slide ${idx + 1}`}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        onError={(e) => { e.target.src = 'https://placehold.co/800x450/e5e7eb/9ca3af?text=Image'; }}
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300" />
+                      <div className="absolute top-2 left-2">
+                        <span className="bg-black/60 text-white text-xs px-2 py-1 rounded-full">Slide {idx + 1}</span>
+                      </div>
+                      {img.title && (
+                        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent">
+                          <p className="text-white text-sm font-medium truncate">{img.title}</p>
+                        </div>
+                      )}
+                      <button
+                        onClick={() => deleteItem('gallery', img.id ?? img._id)}
+                        className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                        title="Remove from hero"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Hero Content Editor */}
+            <div className="mt-10 bg-white rounded-2xl shadow-md border border-gray-100 p-6">
+              <h3 className="text-lg font-bold text-[#14141D] mb-1">Hero Text Content</h3>
+              <p className="text-sm text-gray-500 mb-5">Edit the headline, subtitle, and button labels shown over the slider.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Title Text</label>
+                  <input
+                    type="text"
+                    value={heroContent.title}
+                    onChange={(e) => setHeroContent(prev => ({ ...prev, title: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                    placeholder="e.g. Redefining"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Highlighted Word</label>
+                  <input
+                    type="text"
+                    value={heroContent.highlight}
+                    onChange={(e) => setHeroContent(prev => ({ ...prev, highlight: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                    placeholder="e.g. Homeownership"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Subtitle</label>
+                  <textarea
+                    value={heroContent.subtitle}
+                    onChange={(e) => setHeroContent(prev => ({ ...prev, subtitle: e.target.value }))}
+                    rows={2}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
+                    placeholder="Short description shown below the headline"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Button 1 Text</label>
+                  <input
+                    type="text"
+                    value={heroContent.btn1Text}
+                    onChange={(e) => setHeroContent(prev => ({ ...prev, btn1Text: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Button 1 Link</label>
+                  <input
+                    type="text"
+                    value={heroContent.btn1Link}
+                    onChange={(e) => setHeroContent(prev => ({ ...prev, btn1Link: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                    placeholder="/projects"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Button 2 Text</label>
+                  <input
+                    type="text"
+                    value={heroContent.btn2Text}
+                    onChange={(e) => setHeroContent(prev => ({ ...prev, btn2Text: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Button 2 Link</label>
+                  <input
+                    type="text"
+                    value={heroContent.btn2Link}
+                    onChange={(e) => setHeroContent(prev => ({ ...prev, btn2Link: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                    placeholder="/contact"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end mt-5">
+                <button
+                  onClick={saveHeroContent}
+                  className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-2.5 rounded-md font-semibold text-sm cursor-pointer transition-all shadow-md"
+                >
+                  Save Content
+                </button>
+              </div>
+            </div>
+          </div>
+        );
 
       // ── EVENTS ────────────────────────────────────────────
       case "events":
@@ -968,6 +1168,46 @@ const AdminDashboard = () => {
             <input type="date" name="completionDate" value={formData.completionDate} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg" />
             <input type="text" name="features" placeholder="Features (comma separated)" defaultValue={Array.isArray(formData.features) ? formData.features.join(", ") : ""} onChange={(e) => handleArrayChange("features", e.target.value)} className="w-full px-4 py-2 border rounded-lg" />
             <label className="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="featured" checked={!!formData.featured} onChange={handleInputChange} className="w-4 h-4 text-red-600 rounded focus:ring-red-500" /><span className="text-sm text-gray-700">Featured project</span></label>
+            {/* Gallery images */}
+            <div className="border-2 border-dashed border-amber-200 rounded-lg p-4 bg-amber-50/50">
+              <p className="text-sm font-medium text-gray-700 mb-1">Project Gallery <span className="text-gray-400 font-normal">(multiple images)</span></p>
+              <p className="text-xs text-gray-400 mb-3">These appear alongside the project on the website. Select multiple files at once.</p>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => {
+                  const files = Array.from(e.target.files);
+                  galleryPreviews.forEach(u => URL.revokeObjectURL(u));
+                  setGalleryFiles(files);
+                  setGalleryPreviews(files.map(f => URL.createObjectURL(f)));
+                }}
+                className="w-full text-sm text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200 cursor-pointer"
+              />
+              {galleryPreviews.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mt-3">
+                  {galleryPreviews.map((url, i) => (
+                    <div key={i} className="relative group">
+                      <img src={url} alt="" className="w-full h-16 object-cover rounded-lg border border-gray-200" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          URL.revokeObjectURL(url);
+                          setGalleryFiles(prev => prev.filter((_, idx) => idx !== i));
+                          setGalleryPreviews(prev => prev.filter((_, idx) => idx !== i));
+                        }}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full text-xs flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {galleryFiles.length > 0 && (
+                <p className="text-xs text-amber-700 mt-2">{galleryFiles.length} image{galleryFiles.length !== 1 ? 's' : ''} selected</p>
+              )}
+            </div>
           </>
         );
       case "gallery":

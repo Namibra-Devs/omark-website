@@ -1,7 +1,7 @@
 // pages/HomePage.jsx - Updated with correct services
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Hero from '../components/Hero';
+import HeroSlider from '../components/HeroSlider';
 import Stats from '../components/Stats';
 import ServiceCard from '../components/ServiceCard';
 import ProjectsSlider from '../components/ProjectsSlider';
@@ -32,7 +32,7 @@ const HomePage = () => {
 
   return (
     <>
-      <Hero />
+      <HeroSlider />
       <Stats />
       
       {/* Services Section */}
