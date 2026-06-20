@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useEvents, useCreateEvent, useUpdateEvent, useDeleteEvent, useEventRegistrations } from "../hooks/useEvents";
 import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from "../hooks/useProjects";
 import { useGallery, useCreateGalleryItem, useUpdateGalleryItem, useDeleteGalleryItem } from "../hooks/useGallery";
+import { useHero, useCreateHeroSlide, useUpdateHeroSlide, useDeleteHeroSlide } from "../hooks/useHero";
 import { useNews, useCreateNewsArticle, useUpdateNewsArticle, useDeleteNewsArticle } from "../hooks/useNews";
 import { useCareers, useCreateCareer, useUpdateCareer, useDeleteCareer } from "../hooks/useCareers";
 import { useContactMessages, useUpdateContactStatus, useDeleteContactMessage } from "../hooks/useContact";
@@ -46,19 +47,13 @@ import {
   Layers,
 } from "lucide-react";
 
-const DEFAULT_HERO_CONTENT = {
-  title: 'Redefining',
-  highlight: 'Homeownership',
-  subtitle: 'Premium Real Estate & Construction — From Kumasi to the nation, we build dignity, security, and prosperity for every Ghanaian.',
-  btn1Text: 'Explore Projects',
-  btn1Link: '/projects',
-  btn2Text: 'Get Consultation',
-  btn2Link: '/contact',
-};
-
 const EMPTY_FORM = {
   // shared
   title: "", description: "", category: "", status: "upcoming", featured: false,
+  // hero slides (note: `active` and `order` are defined below in jobs/faqs sections)
+  badge: "", highlight: "", subtitle: "", btn1Text: "", btn1Link: "", btn2Text: "", btn2Link: "",
+  // gallery
+  mediaType: "image",
   // events & programs
   date: "", time: "", location: "", maxAttendees: "",
   // projects
@@ -147,14 +142,6 @@ const AdminDashboard = () => {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [viewingContact, setViewingContact] = useState(null);
   const [expandedEventId, setExpandedEventId] = useState(null);
-  const [heroContent, setHeroContent] = useState(() => {
-    try {
-      const saved = localStorage.getItem('hero_content');
-      return saved ? { ...DEFAULT_HERO_CONTENT, ...JSON.parse(saved) } : DEFAULT_HERO_CONTENT;
-    } catch {
-      return DEFAULT_HERO_CONTENT;
-    }
-  });
 
   const user = (() => {
     try { return JSON.parse(localStorage.getItem("user")) || { name: "Admin", email: "" }; }
@@ -169,7 +156,7 @@ const AdminDashboard = () => {
   const { data: eventsData } = useEvents({ page: 1, limit: 100 });
   const { data: projectsData } = useProjects({ page: 1, limit: 100 });
   const { data: galleryData } = useGallery({ page: 1, limit: 100 });
-  const { data: heroGalleryData } = useGallery({ category: 'Hero', limit: 20 });
+  const { data: heroData } = useHero({ all: true });
   const { data: newsData } = useNews({ page: 1, limit: 100 });
   const { data: careersData } = useCareers({ page: 1, limit: 100 });
   const { data: contactsData } = useContactMessages({ page: 1, limit: 100 });
@@ -197,6 +184,9 @@ const AdminDashboard = () => {
   const createGallery = useCreateGalleryItem();
   const updateGallery = useUpdateGalleryItem();
   const deleteGallery = useDeleteGalleryItem();
+  const createHero = useCreateHeroSlide();
+  const updateHero = useUpdateHeroSlide();
+  const deleteHero = useDeleteHeroSlide();
   // Mutations — news/jobs/contacts
   const createNews = useCreateNewsArticle();
   const updateNews = useUpdateNewsArticle();
@@ -220,11 +210,6 @@ const AdminDashboard = () => {
   const showNotification = (message, type = "success") => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
-  };
-
-  const saveHeroContent = () => {
-    localStorage.setItem('hero_content', JSON.stringify(heroContent));
-    showNotification('Hero content saved! Refresh the homepage to see changes.');
   };
 
   const handleLogout = async () => {
@@ -306,16 +291,42 @@ const AdminDashboard = () => {
         showNotification("Project added!");
       }
       if (galleryFiles.length > 0 && projectId) {
-        await Promise.all(galleryFiles.map(f => projectsApi.addGalleryImage(projectId, { image: f })));
+        await Promise.all(galleryFiles.map(f => projectsApi.addGalleryImage(projectId, { image: f, mediaType: f.type?.startsWith('video/') ? 'video' : 'image' })));
       }
       closeModal();
     } catch { showNotification("Failed to save project.", "warning"); }
+  };
+
+  const saveHero = async () => {
+    try {
+      if (!editingItem && !imageFile) {
+        showNotification("Please select a slide image.", "warning");
+        return;
+      }
+      const payload = {
+        title: formData.title, subtitle: formData.subtitle,
+        badge: formData.badge, highlight: formData.highlight,
+        btn1Text: formData.btn1Text, btn1Link: formData.btn1Link,
+        btn2Text: formData.btn2Text, btn2Link: formData.btn2Link,
+        order: Number(formData.order) || 0, active: formData.active,
+        ...(imageFile ? { image: imageFile } : {}),
+      };
+      if (editingItem) {
+        await updateHero.mutateAsync({ id: editingItem.id, ...payload });
+        showNotification("Hero slide updated!");
+      } else {
+        await createHero.mutateAsync(payload);
+        showNotification("Hero slide added!");
+      }
+      closeModal();
+    } catch { showNotification("Failed to save hero slide.", "warning"); }
   };
 
   const saveGalleryItem = async () => {
     try {
       const payload = {
         title: formData.title, category: formData.category, tags: formData.tags,
+        mediaType: formData.mediaType || "image",
         ...(imageFile ? { image: imageFile } : {}),
       };
       if (editingItem) {
@@ -445,6 +456,7 @@ const AdminDashboard = () => {
       if (type === "events") await deleteEvent.mutateAsync(id);
       else if (type === "projects") await deleteProject.mutateAsync(id);
       else if (type === "gallery") await deleteGallery.mutateAsync(id);
+      else if (type === "hero") await deleteHero.mutateAsync(id);
       else if (type === "news") await deleteNews.mutateAsync(id);
       else if (type === "jobs") await deleteCareer.mutateAsync(id);
       else if (type === "contacts") await deleteContact.mutateAsync(id);
@@ -530,12 +542,13 @@ const AdminDashboard = () => {
 
   const getModalTitle = () => {
     const a = editingItem ? "Edit" : "Add";
-    const map = { events: "Event", projects: "Project", gallery: "Gallery Image", news: "News Article", jobs: "Job Listing", faqs: "FAQ", testimonials: "Testimonial", programs: "Program" };
+    const map = { hero: "Hero Slide", events: "Event", projects: "Project", gallery: "Gallery Image", news: "News Article", jobs: "Job Listing", faqs: "FAQ", testimonials: "Testimonial", programs: "Program" };
     return `${a} ${map[modalType] ?? "Item"}`;
   };
 
   const handleSave = () => {
-    if (modalType === "events") saveEvent();
+    if (modalType === "hero") saveHero();
+    else if (modalType === "events") saveEvent();
     else if (modalType === "projects") saveProject();
     else if (modalType === "news") saveNews();
     else if (modalType === "jobs") saveJob();
@@ -547,7 +560,7 @@ const AdminDashboard = () => {
 
   // ── Sidebar ───────────────────────────────────────────────
 
-  const heroImages = Array.isArray(heroGalleryData) ? heroGalleryData : (heroGalleryData?.data ?? []);
+  const heroSlides = Array.isArray(heroData) ? heroData : (heroData?.data ?? []);
 
   const sidebarItems = [
     { id: "hero", label: "Hero Slider", icon: Layers },
@@ -573,153 +586,55 @@ const AdminDashboard = () => {
           <div>
             <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-[#14141D]">Hero Slider Images</h2>
-                <p className="text-sm text-gray-500 mt-1">Images uploaded here appear in the homepage hero slider. Drag to reorder (coming soon).</p>
+                <h2 className="text-2xl font-bold text-[#14141D]">Hero Slider</h2>
+                <p className="text-sm text-gray-500 mt-1">Each slide has its own image, headline, subtitle and buttons. Slides show in ascending order on the homepage.</p>
               </div>
-              <label className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-5 py-2.5 rounded-md cursor-pointer transition-all shadow-md">
-                <Upload size={18} /> Upload Image
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    try {
-                      await createGallery.mutateAsync({ title: file.name.replace(/\.[^.]+$/, ''), category: 'Hero', image: file });
-                      showNotification('Hero image uploaded!');
-                    } catch {
-                      showNotification('Upload failed.', 'warning');
-                    }
-                    e.target.value = '';
-                  }}
-                />
-              </label>
+              <button onClick={() => openModal("hero")} className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-5 py-2.5 rounded-md cursor-pointer transition-all shadow-md">
+                <Plus size={18} /> Add Slide
+              </button>
             </div>
 
-            {heroImages.length === 0 ? (
+            {heroSlides.length === 0 ? (
               <div className="text-center py-20 text-gray-400">
                 <Layers size={48} className="mx-auto mb-4 opacity-30" />
-                <p className="font-medium">No hero images yet</p>
-                <p className="text-sm mt-1">Upload images above — they will appear in the homepage slider immediately.</p>
+                <p className="font-medium">No hero slides yet</p>
+                <p className="text-sm mt-1">Add a slide above — it will appear in the homepage slider immediately.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {heroImages.map((img, idx) => {
-                  const src = img.imageUrl ?? img.url ?? img.image ?? '';
-                  return (
-                    <div key={img.id ?? img._id ?? idx} className="relative group rounded-2xl overflow-hidden shadow-md bg-gray-100 aspect-video">
+                {heroSlides.map((slide, idx) => (
+                  <div key={slide.id ?? idx} className="relative group rounded-2xl overflow-hidden shadow-md bg-gray-100">
+                    <div className="relative aspect-video">
                       <img
-                        src={src}
-                        alt={img.title ?? `Slide ${idx + 1}`}
+                        src={slide.image}
+                        alt={slide.title ?? `Slide ${idx + 1}`}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         onError={(e) => { e.target.src = 'https://placehold.co/800x450/e5e7eb/9ca3af?text=Image'; }}
                       />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300" />
-                      <div className="absolute top-2 left-2">
-                        <span className="bg-black/60 text-white text-xs px-2 py-1 rounded-full">Slide {idx + 1}</span>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                      <div className="absolute top-2 left-2 flex gap-1.5">
+                        <span className="bg-black/60 text-white text-xs px-2 py-1 rounded-full">#{slide.order ?? 0}</span>
+                        {!slide.active && <span className="bg-gray-700/80 text-white text-xs px-2 py-1 rounded-full">Hidden</span>}
                       </div>
-                      {img.title && (
-                        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent">
-                          <p className="text-white text-sm font-medium truncate">{img.title}</p>
-                        </div>
-                      )}
-                      <button
-                        onClick={() => deleteItem('gallery', img.id ?? img._id)}
-                        className="absolute top-2 right-2 p-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                        title="Remove from hero"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => openModal("hero", slide)} className="p-1.5 bg-white/90 hover:bg-blue-500 hover:text-white text-gray-700 rounded-lg cursor-pointer transition" title="Edit slide"><Edit size={14} /></button>
+                        <button onClick={() => deleteItem('hero', slide.id)} className="p-1.5 bg-white/90 hover:bg-red-500 hover:text-white text-gray-700 rounded-lg cursor-pointer transition" title="Delete slide"><Trash2 size={14} /></button>
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 p-3">
+                        <p className="text-white text-sm font-bold truncate">
+                          {slide.title} {slide.highlight && <span className="text-red-400">{slide.highlight}</span>}
+                        </p>
+                        {slide.subtitle && <p className="text-gray-200 text-xs truncate">{slide.subtitle}</p>}
+                      </div>
                     </div>
-                  );
-                })}
+                    <div className="p-3 flex flex-wrap gap-1.5">
+                      {slide.btn1Text && <span className="text-xs bg-red-50 text-red-700 px-2 py-0.5 rounded-full">{slide.btn1Text} → {slide.btn1Link || "#"}</span>}
+                      {slide.btn2Text && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{slide.btn2Text} → {slide.btn2Link || "#"}</span>}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
-
-            {/* Hero Content Editor */}
-            <div className="mt-10 bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-              <h3 className="text-lg font-bold text-[#14141D] mb-1">Hero Text Content</h3>
-              <p className="text-sm text-gray-500 mb-5">Edit the headline, subtitle, and button labels shown over the slider.</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Title Text</label>
-                  <input
-                    type="text"
-                    value={heroContent.title}
-                    onChange={(e) => setHeroContent(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
-                    placeholder="e.g. Redefining"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Highlighted Word</label>
-                  <input
-                    type="text"
-                    value={heroContent.highlight}
-                    onChange={(e) => setHeroContent(prev => ({ ...prev, highlight: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
-                    placeholder="e.g. Homeownership"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Subtitle</label>
-                  <textarea
-                    value={heroContent.subtitle}
-                    onChange={(e) => setHeroContent(prev => ({ ...prev, subtitle: e.target.value }))}
-                    rows={2}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
-                    placeholder="Short description shown below the headline"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Button 1 Text</label>
-                  <input
-                    type="text"
-                    value={heroContent.btn1Text}
-                    onChange={(e) => setHeroContent(prev => ({ ...prev, btn1Text: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Button 1 Link</label>
-                  <input
-                    type="text"
-                    value={heroContent.btn1Link}
-                    onChange={(e) => setHeroContent(prev => ({ ...prev, btn1Link: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
-                    placeholder="/projects"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Button 2 Text</label>
-                  <input
-                    type="text"
-                    value={heroContent.btn2Text}
-                    onChange={(e) => setHeroContent(prev => ({ ...prev, btn2Text: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Button 2 Link</label>
-                  <input
-                    type="text"
-                    value={heroContent.btn2Link}
-                    onChange={(e) => setHeroContent(prev => ({ ...prev, btn2Link: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
-                    placeholder="/contact"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end mt-5">
-                <button
-                  onClick={saveHeroContent}
-                  className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-2.5 rounded-md font-semibold text-sm cursor-pointer transition-all shadow-md"
-                >
-                  Save Content
-                </button>
-              </div>
-            </div>
           </div>
         );
 
@@ -836,12 +751,19 @@ const AdminDashboard = () => {
               {filteredGallery.map((item) => (
                 <div key={item.id} className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-lg transition-all">
                   <div className="relative h-48">
-                    <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                    {item.mediaType === "video" ? (
+                      <video src={item.image} muted playsInline className="w-full h-full object-cover" />
+                    ) : (
+                      <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                    )}
                     <div className="absolute top-2 right-2 flex gap-1">
                       <button onClick={() => openModal("gallery", item)} className="p-1.5 bg-white/90 rounded-lg hover:bg-blue-500 hover:text-white transition"><Edit size={14} /></button>
                       <button onClick={() => deleteItem("gallery", item.id)} className="p-1.5 bg-white/90 rounded-lg hover:bg-red-500 hover:text-white transition"><Trash2 size={14} /></button>
                     </div>
-                    <div className="absolute bottom-2 left-2"><span className="text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">{item.category}</span></div>
+                    <div className="absolute bottom-2 left-2 flex gap-1">
+                      <span className="text-xs bg-black/50 text-white px-2 py-0.5 rounded-full">{item.category}</span>
+                      {item.mediaType === "video" && <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full">Video</span>}
+                    </div>
                   </div>
                   <div className="p-3">
                     <h4 className="font-semibold text-sm line-clamp-1">{item.title}</h4>
@@ -1131,6 +1053,22 @@ const AdminDashboard = () => {
 
   const renderModalFields = () => {
     switch (modalType) {
+      case "hero":
+        return (
+          <>
+            <input type="text" name="badge" placeholder="Badge label (e.g. Building Ghana's Future)" value={formData.badge} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500" />
+            <input type="text" name="highlight" placeholder="Highlighted word (accent colour, e.g. Homeownership)" value={formData.highlight} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500" />
+            <textarea name="subtitle" placeholder="Subtitle / supporting text *" rows={3} value={formData.subtitle} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500" />
+            <div className="grid grid-cols-2 gap-3">
+              <input type="text" name="btn1Text" placeholder="Button 1 text" value={formData.btn1Text} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg" />
+              <input type="text" name="btn1Link" placeholder="Button 1 link (e.g. /projects)" value={formData.btn1Link} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg" />
+              <input type="text" name="btn2Text" placeholder="Button 2 text" value={formData.btn2Text} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg" />
+              <input type="text" name="btn2Link" placeholder="Button 2 link (e.g. /contact)" value={formData.btn2Link} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg" />
+            </div>
+            <input type="number" name="order" placeholder="Display order (e.g. 0, 1, 2)" value={formData.order} onChange={handleInputChange} min="0" className="w-full px-4 py-2 border rounded-lg" />
+            <label className="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="active" checked={!!formData.active} onChange={handleInputChange} className="w-4 h-4 text-red-600 rounded focus:ring-red-500" /><span className="text-sm text-gray-700">Active (visible on homepage)</span></label>
+          </>
+        );
       case "events":
         return (
           <>
@@ -1170,11 +1108,11 @@ const AdminDashboard = () => {
             <label className="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="featured" checked={!!formData.featured} onChange={handleInputChange} className="w-4 h-4 text-red-600 rounded focus:ring-red-500" /><span className="text-sm text-gray-700">Featured project</span></label>
             {/* Gallery images */}
             <div className="border-2 border-dashed border-amber-200 rounded-lg p-4 bg-amber-50/50">
-              <p className="text-sm font-medium text-gray-700 mb-1">Project Gallery <span className="text-gray-400 font-normal">(multiple images)</span></p>
-              <p className="text-xs text-gray-400 mb-3">These appear alongside the project on the website. Select multiple files at once.</p>
+              <p className="text-sm font-medium text-gray-700 mb-1">Project Gallery <span className="text-gray-400 font-normal">(images &amp; videos)</span></p>
+              <p className="text-xs text-gray-400 mb-3">These appear alongside the project on the website. Select multiple image or video files at once.</p>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,video/*"
                 multiple
                 onChange={(e) => {
                   const files = Array.from(e.target.files);
@@ -1188,7 +1126,11 @@ const AdminDashboard = () => {
                 <div className="grid grid-cols-4 gap-2 mt-3">
                   {galleryPreviews.map((url, i) => (
                     <div key={i} className="relative group">
-                      <img src={url} alt="" className="w-full h-16 object-cover rounded-lg border border-gray-200" />
+                      {galleryFiles[i]?.type?.startsWith('video/') ? (
+                        <video src={url} muted playsInline className="w-full h-16 object-cover rounded-lg border border-gray-200" />
+                      ) : (
+                        <img src={url} alt="" className="w-full h-16 object-cover rounded-lg border border-gray-200" />
+                      )}
                       <button
                         type="button"
                         onClick={() => {
@@ -1213,6 +1155,21 @@ const AdminDashboard = () => {
       case "gallery":
         return (
           <>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Media Type</label>
+              <div className="flex gap-2">
+                {["image", "video"].map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => { setFormData({ ...formData, mediaType: t }); setImageFile(null); }}
+                    className={`flex-1 px-4 py-2 rounded-lg border text-sm font-medium capitalize cursor-pointer transition ${(formData.mediaType || "image") === t ? "bg-red-600 text-white border-red-600" : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
             <select name="category" value={formData.category} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg">
               <option value="">Select Category</option>
               {["Residential","Commercial","Construction","Events"].map(c => <option key={c} value={c}>{c}</option>)}
@@ -1301,7 +1258,8 @@ const AdminDashboard = () => {
 
   const hasImageUpload = !["jobs", "faqs", "contacts", "testimonials"].includes(modalType);
   const hasTitle = !["faqs", "testimonials"].includes(modalType);
-  const hasDescription = !["gallery", "faqs", "testimonials"].includes(modalType);
+  const hasDescription = !["hero", "gallery", "faqs", "testimonials"].includes(modalType);
+  const heroOrGalleryVideo = modalType === "gallery" && formData.mediaType === "video";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -1449,8 +1407,8 @@ const AdminDashboard = () => {
                 {hasImageUpload && (
                   <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center">
                     <Upload size={24} className="mx-auto text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-500 mb-2">{imageFile ? imageFile.name : editingItem?.image ? "Current image — upload new to replace" : "Select image to upload"}</p>
-                    <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0] || null)} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-red-50 file:text-red-700 hover:file:bg-red-100" />
+                    <p className="text-sm text-gray-500 mb-2">{imageFile ? imageFile.name : (editingItem?.image || editingItem?.url) ? `Current ${heroOrGalleryVideo ? "video" : "image"} — upload new to replace` : `Select ${heroOrGalleryVideo ? "video" : "image"} to upload`}</p>
+                    <input type="file" accept={heroOrGalleryVideo ? "video/*" : "image/*"} onChange={(e) => setImageFile(e.target.files[0] || null)} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-red-50 file:text-red-700 hover:file:bg-red-100" />
                   </div>
                 )}
 

@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Download,
   ArrowRight,
+  Play,
 } from "lucide-react";
 import Stats from "@/components/Stats";
 import { useGallery, useGalleryCategories } from "../hooks/useGallery";
@@ -43,6 +44,7 @@ const normalizeGalleryItem = (item) => ({
   description: item.description ?? '',
   category: item.category ?? 'Uncategorized',
   subcategory: item.subcategory ?? 'General',
+  mediaType: item.mediaType ?? 'image',
   image: item.image ?? item.imageUrl ?? item.url ?? item.thumbnail ?? '',
   location: item.location ?? '',
   date: item.date ?? (item.createdAt ? new Date(item.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : ''),
@@ -266,16 +268,33 @@ const GalleryPage = () => {
                 onClick={() => openLightbox(item)}
               >
                 <div className="relative h-80">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    onError={(e) =>
-                      (e.target.src =
-                        "https://placehold.co/600x500/2c3e50/f59e0b?text=" +
-                        item.title.charAt(0))
-                    }
-                  />
+                  {item.mediaType === "video" ? (
+                    <video
+                      src={item.image}
+                      muted
+                      loop
+                      playsInline
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 pointer-events-none"
+                    />
+                  ) : (
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) =>
+                        (e.target.src =
+                          "https://placehold.co/600x500/2c3e50/f59e0b?text=" +
+                          item.title.charAt(0))
+                      }
+                    />
+                  )}
+                  {item.mediaType === "video" && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center">
+                        <Play size={24} className="text-white fill-white ml-1" />
+                      </div>
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                     <h3 className="text-white font-bold text-lg mb-1">
@@ -443,16 +462,33 @@ const GalleryPage = () => {
                   onClick={() => openLightbox(item)}
                 >
                   <div className="relative h-64 overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      onError={(e) =>
-                        (e.target.src =
-                          "https://placehold.co/600x500/2c3e50/f59e0b?text=" +
-                          item.title.charAt(0))
-                      }
-                    />
+                    {item.mediaType === "video" ? (
+                      <video
+                        src={item.image}
+                        muted
+                        loop
+                        playsInline
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 pointer-events-none"
+                      />
+                    ) : (
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        onError={(e) =>
+                          (e.target.src =
+                            "https://placehold.co/600x500/2c3e50/f59e0b?text=" +
+                            item.title.charAt(0))
+                        }
+                      />
+                    )}
+                    {item.mediaType === "video" && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-12 h-12 rounded-full bg-black/50 flex items-center justify-center">
+                          <Play size={20} className="text-white fill-white ml-0.5" />
+                        </div>
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                     {/* Category Badge */}
@@ -566,11 +602,21 @@ const GalleryPage = () => {
                 className="relative max-w-5xl w-full"
                 onClick={(e) => e.stopPropagation()}
               >
-                <img
-                  src={selectedImage.image}
-                  alt={selectedImage.title}
-                  className="w-full h-auto max-h-[80vh] object-contain rounded-2xl"
-                />
+                {selectedImage.mediaType === "video" ? (
+                  <video
+                    src={selectedImage.image}
+                    controls
+                    autoPlay
+                    playsInline
+                    className="w-full h-auto max-h-[80vh] object-contain rounded-2xl bg-black"
+                  />
+                ) : (
+                  <img
+                    src={selectedImage.image}
+                    alt={selectedImage.title}
+                    className="w-full h-auto max-h-[80vh] object-contain rounded-2xl"
+                  />
+                )}
 
                 {/* Image Info */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-2xl">

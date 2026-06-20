@@ -36,7 +36,13 @@ const STATIC_PROJECTS = [
 const normalizeApiProject = (p) => ({
   ...p,
   image: p.image ?? p.imageUrl ?? p.thumbnail ?? '',
-  gallery: Array.isArray(p.gallery) ? p.gallery.map(g => g.url ?? g.imageUrl ?? g).filter(Boolean) : [],
+  gallery: Array.isArray(p.gallery)
+    ? p.gallery
+        .map(g => (typeof g === 'string'
+          ? { url: g, mediaType: 'image' }
+          : { url: g.url ?? g.imageUrl ?? '', mediaType: g.mediaType ?? 'image' }))
+        .filter(g => g.url)
+    : [],
   location: p.location ?? p.address ?? p.city ?? '',
   completionDate: p.completionDate ?? p.completionYear ?? p.year ?? '',
   size: p.size ?? p.totalArea ?? p.area ?? '',
@@ -77,6 +83,12 @@ const ProjectsPage = () => {
       return matchesSearch && matchesStatus && matchesCategory;
     });
   }, [searchTerm, selectedStatus, selectedCategory, allProjects]);
+
+  // Gallery entries may be plain URL strings (static data) or { url, mediaType } objects (API)
+  const galleryEntry = (g) =>
+    typeof g === "string"
+      ? { url: g, mediaType: "image" }
+      : { url: g?.url ?? "", mediaType: g?.mediaType ?? "image" };
 
   const getStatusBadgeColor = (status) => {
     switch (status) {
@@ -425,15 +437,31 @@ const ProjectsPage = () => {
               {/* Gallery Section with Navigation */}
               <div className="relative bg-gray-900">
                 <div className="relative h-80 md:h-96 overflow-hidden">
-                  <img
-                    src={selectedProject.gallery?.[currentImageIndex] || selectedProject.image}
-                    alt={`${selectedProject.title} - Image ${currentImageIndex + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.src = `https://placehold.co/1200x800/2c3e50/f59e0b?text=Image+${currentImageIndex + 1}`;
-                    }}
-                  />
-                  
+                  {(() => {
+                    const media = selectedProject.gallery?.[currentImageIndex]
+                      ? galleryEntry(selectedProject.gallery[currentImageIndex])
+                      : { url: selectedProject.image, mediaType: "image" };
+                    return media.mediaType === "video" ? (
+                      <video
+                        key={media.url}
+                        src={media.url}
+                        controls
+                        autoPlay
+                        playsInline
+                        className="w-full h-full object-contain bg-black"
+                      />
+                    ) : (
+                      <img
+                        src={media.url || selectedProject.image}
+                        alt={`${selectedProject.title} - Image ${currentImageIndex + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = `https://placehold.co/1200x800/2c3e50/f59e0b?text=Image+${currentImageIndex + 1}`;
+                        }}
+                      />
+                    );
+                  })()}
+
                   {/* Navigation Arrows */}
                   {selectedProject.gallery && selectedProject.gallery.length > 1 && (
                     <>
