@@ -4,6 +4,10 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useHero } from '../hooks/useHero';
 
+// Cloudinary video URLs are served under /video/upload/; also catch common video extensions.
+const isVideoUrl = (u = '') =>
+  /\/video\/upload\//.test(u) || /\.(mp4|webm|ogg|mov|m4v)(\?|$)/i.test(u);
+
 // Shown only when no slides have been configured in the admin dashboard yet.
 const STATIC_SLIDES = [
   {
@@ -92,14 +96,26 @@ const HeroSlider = () => {
             pointerEvents: idx === current ? 'auto' : 'none',
           }}
         >
-          <img
-            src={slide.image}
-            alt={slide.title}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-            onError={(e) => {
-              e.target.src = 'https://placehold.co/1920x800/14141D/f59e0b?text=Omark+Properties';
-            }}
-          />
+          {isVideoUrl(slide.image) ? (
+            <video
+              src={slide.image}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          ) : (
+            <img
+              src={slide.image}
+              alt={slide.title}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              onError={(e) => {
+                e.target.src = 'https://placehold.co/1920x800/14141D/f59e0b?text=Omark+Properties';
+              }}
+            />
+          )}
 
           {/* Dark overlays */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#14141D]/85 via-[#14141D]/50 to-[#14141D]/40" />

@@ -14,9 +14,15 @@ const STATIC_PROJECTS = [
 
 const normalizeProject = (p) => {
   if (p.mainImage && p.images && p.stats) return p;
-  const gallery = Array.isArray(p.gallery) ? p.gallery.map(g => g.url ?? g.imageUrl ?? g).filter(Boolean) : [];
-  const mainImage = p.mainImage ?? p.image ?? p.imageUrl ?? p.thumbnail ?? (gallery[0] ?? '');
-  const images = p.images ?? (gallery.length > 0 ? gallery : [mainImage]).filter(Boolean);
+  const gallery = Array.isArray(p.gallery)
+    ? p.gallery
+        .map(g => typeof g === 'string'
+          ? { url: g, mediaType: 'image' }
+          : { url: g.url ?? g.imageUrl ?? '', mediaType: g.mediaType ?? 'image' })
+        .filter(g => g.url)
+    : [];
+  const mainImage = p.mainImage ?? p.image ?? p.imageUrl ?? p.thumbnail ?? (gallery[0]?.url ?? '');
+  const images = p.images ?? (gallery.length > 0 ? gallery : [{ url: mainImage, mediaType: 'image' }]);
   const buildStats = () => {
     const s = {};
     if (p.units ?? p.totalUnits) s.units = `${p.units ?? p.totalUnits} Units`;
@@ -57,6 +63,9 @@ function ProjectModal({ project, onClose }) {
 
   const prev = () => setImgIdx((i) => (i === 0 ? project.images.length - 1 : i - 1));
   const next = () => setImgIdx((i) => (i === project.images.length - 1 ? 0 : i + 1));
+
+  const currentItem = project.images[imgIdx];
+  const currentIsVideo = typeof currentItem === 'object' && currentItem?.mediaType === 'video';
 
   const arrowStyle = {
     position: 'absolute', top: '50%', transform: 'translateY(-50%)',
@@ -115,28 +124,46 @@ function ProjectModal({ project, onClose }) {
           boxShadow: '0 40px 100px rgba(0,0,0,0.7)',
         }}
       >
-        {/* ── Image gallery (fixed aspect ratio = reliable sizing) ── */}
-        <div style={{ position: 'relative', aspectRatio: '16 / 9', width: '100%', flexShrink: 0, background: '#080810' }}>
-          <img
-            key={imgIdx}
-            src={project.images[imgIdx]}
-            alt={`${project.title} — image ${imgIdx + 1}`}
-            onError={(e) => { e.target.src = placeholder(project.title); }}
-            style={{
+        {/* ── Media gallery — capped height so the details panel is always visible ── */}
+        <div style={{ position: 'relative', height: 'min(42vh, 400px)', width: '100%', flexShrink: 0, background: '#080810' }}>
+          {(() => {
+            const item = project.images[imgIdx];
+            const url = typeof item === 'string' ? item : item?.url;
+            const isVideo = typeof item === 'object' && item?.mediaType === 'video';
+            const mediaStyle = {
               position: 'absolute', inset: 0,
               width: '100%', height: '100%',
-              objectFit: 'cover',
+              objectFit: isVideo ? 'contain' : 'cover',
               objectPosition: 'center',
               display: 'block',
               transition: 'opacity 0.35s ease',
-            }}
-          />
+            };
+            return isVideo ? (
+              <video
+                key={imgIdx}
+                src={url}
+                controls
+                playsInline
+                style={mediaStyle}
+              />
+            ) : (
+              <img
+                key={imgIdx}
+                src={url}
+                alt={`${project.title} — image ${imgIdx + 1}`}
+                onError={(e) => { e.target.src = placeholder(project.title); }}
+                style={mediaStyle}
+              />
+            );
+          })()}
 
-          {/* Bottom gradient — bleeds into content panel */}
-          <div style={{
-            position: 'absolute', inset: 0, pointerEvents: 'none',
-            background: 'linear-gradient(to top, #0E0E1A 0%, rgba(14,14,26,0.35) 20%, transparent 0%)',
-          }} />
+          {/* Bottom gradient — bleeds into content panel (hidden for video so controls stay clean) */}
+          {!currentIsVideo && (
+            <div style={{
+              position: 'absolute', inset: 0, pointerEvents: 'none',
+              background: 'linear-gradient(to top, #0E0E1A 0%, rgba(14,14,26,0.35) 22%, transparent 45%)',
+            }} />
+          )}
 
           {/* Tag pill */}
           <span style={{
@@ -184,10 +211,10 @@ function ProjectModal({ project, onClose }) {
             </>
           )}
 
-          {/* Dot indicators */}
+          {/* Dot indicators — raised above the native video control bar when a video is showing */}
           {project.images.length > 1 && (
             <div style={{
-              position: 'absolute', bottom: 18,
+              position: 'absolute', bottom: currentIsVideo ? 52 : 18,
               left: '50%', transform: 'translateX(-50%)',
               display: 'flex', gap: 6, alignItems: 'center',
             }}>
@@ -381,7 +408,6 @@ function ProjectCard({ project, onOpen }) {
           margin: '0 0 8px',
           fontSize: 18,
           fontWeight: 800,
-          color: '#fff',
           fontFamily: "'Playfair Display', Georgia, serif",
           transition: 'color 0.2s',
           color: hovered ? '#7B170F' : '#fff',

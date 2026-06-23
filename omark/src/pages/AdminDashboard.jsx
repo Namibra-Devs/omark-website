@@ -45,6 +45,7 @@ import {
   BookOpen,
   ChevronDown,
   Layers,
+  Loader2,
 } from "lucide-react";
 
 const EMPTY_FORM = {
@@ -131,6 +132,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("events");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState("");
   const [editingItem, setEditingItem] = useState(null);
@@ -139,6 +141,7 @@ const AdminDashboard = () => {
   const [imageFile, setImageFile] = useState(null);
   const [galleryFiles, setGalleryFiles] = useState([]);
   const [galleryPreviews, setGalleryPreviews] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [viewingContact, setViewingContact] = useState(null);
   const [expandedEventId, setExpandedEventId] = useState(null);
@@ -231,7 +234,10 @@ const AdminDashboard = () => {
     setImageFile(null);
     if (item) {
       setEditingItem(item);
-      setFormData({ ...EMPTY_FORM, ...item });
+      // Derive media type from the stored URL when the record doesn't persist it (e.g. hero slides)
+      const mediaUrl = item.image || item.url || "";
+      const isVid = /\/video\/upload\//.test(mediaUrl) || /\.(mp4|webm|ogg|mov|m4v)(\?|$)/i.test(mediaUrl);
+      setFormData({ ...EMPTY_FORM, ...item, mediaType: item.mediaType || (isVid ? "video" : "image") });
     } else {
       setEditingItem(null);
       setFormData(EMPTY_FORM);
@@ -290,8 +296,13 @@ const AdminDashboard = () => {
         projectId = created?.id ?? created?._id;
         showNotification("Project added!");
       }
+      // Gallery uploads are secondary — a failure here must not keep the modal open
       if (galleryFiles.length > 0 && projectId) {
-        await Promise.all(galleryFiles.map(f => projectsApi.addGalleryImage(projectId, { image: f, mediaType: f.type?.startsWith('video/') ? 'video' : 'image' })));
+        try {
+          await Promise.all(galleryFiles.map(f => projectsApi.addGalleryImage(projectId, { image: f, mediaType: f.type?.startsWith('video/') ? 'video' : 'image' })));
+        } catch {
+          showNotification("Project saved, but some gallery files failed to upload.", "warning");
+        }
       }
       closeModal();
     } catch { showNotification("Failed to save project.", "warning"); }
@@ -309,6 +320,7 @@ const AdminDashboard = () => {
         btn1Text: formData.btn1Text, btn1Link: formData.btn1Link,
         btn2Text: formData.btn2Text, btn2Link: formData.btn2Link,
         order: Number(formData.order) || 0, active: formData.active,
+        mediaType: formData.mediaType || "image",
         ...(imageFile ? { image: imageFile } : {}),
       };
       if (editingItem) {
@@ -546,16 +558,22 @@ const AdminDashboard = () => {
     return `${a} ${map[modalType] ?? "Item"}`;
   };
 
-  const handleSave = () => {
-    if (modalType === "hero") saveHero();
-    else if (modalType === "events") saveEvent();
-    else if (modalType === "projects") saveProject();
-    else if (modalType === "news") saveNews();
-    else if (modalType === "jobs") saveJob();
-    else if (modalType === "faqs") saveFaq();
-    else if (modalType === "testimonials") saveTestimonial();
-    else if (modalType === "programs") saveProgram();
-    else saveGalleryItem();
+  const handleSave = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      if (modalType === "hero") await saveHero();
+      else if (modalType === "events") await saveEvent();
+      else if (modalType === "projects") await saveProject();
+      else if (modalType === "news") await saveNews();
+      else if (modalType === "jobs") await saveJob();
+      else if (modalType === "faqs") await saveFaq();
+      else if (modalType === "testimonials") await saveTestimonial();
+      else if (modalType === "programs") await saveProgram();
+      else await saveGalleryItem();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // ── Sidebar ───────────────────────────────────────────────
@@ -713,7 +731,7 @@ const AdminDashboard = () => {
               {filteredProjects.map((project) => (
                 <div key={project.id} className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden group hover:shadow-xl transition-all">
                   <div className="relative h-48 overflow-hidden">
-                    <img src={project.image} alt={project.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                    <img src={project.image} alt={project.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" onError={(e) => { e.target.src = "https://placehold.co/600x400/14141D/ffffff?text=" + encodeURIComponent(project.title || "Project"); }} />
                     <div className="absolute top-2 right-2 flex gap-1">
                       <button onClick={() => openModal("projects", project)} className="p-1.5 bg-white/90 rounded-lg hover:bg-blue-500 hover:text-white transition"><Edit size={14} /></button>
                       <button onClick={() => deleteItem("projects", project.id)} className="p-1.5 bg-white/90 rounded-lg hover:bg-red-500 hover:text-white transition"><Trash2 size={14} /></button>
@@ -1056,6 +1074,21 @@ const AdminDashboard = () => {
       case "hero":
         return (
           <>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1 uppercase tracking-wide">Background Media</label>
+              <div className="flex gap-2">
+                {["image", "video"].map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => { setFormData({ ...formData, mediaType: t }); setImageFile(null); }}
+                    className={`flex-1 px-4 py-2 rounded-lg border text-sm font-medium capitalize cursor-pointer transition ${(formData.mediaType || "image") === t ? "bg-red-600 text-white border-red-600" : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
             <input type="text" name="badge" placeholder="Badge label (e.g. Building Ghana's Future)" value={formData.badge} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500" />
             <input type="text" name="highlight" placeholder="Highlighted word (accent colour, e.g. Homeownership)" value={formData.highlight} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500" />
             <textarea name="subtitle" placeholder="Subtitle / supporting text *" rows={3} value={formData.subtitle} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500" />
@@ -1259,7 +1292,7 @@ const AdminDashboard = () => {
   const hasImageUpload = !["jobs", "faqs", "contacts", "testimonials"].includes(modalType);
   const hasTitle = !["faqs", "testimonials"].includes(modalType);
   const hasDescription = !["hero", "gallery", "faqs", "testimonials"].includes(modalType);
-  const heroOrGalleryVideo = modalType === "gallery" && formData.mediaType === "video";
+  const heroOrGalleryVideo = (modalType === "gallery" || modalType === "hero") && formData.mediaType === "video";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -1276,8 +1309,13 @@ const AdminDashboard = () => {
         )}
       </AnimatePresence>
 
+      {/* Mobile sidebar backdrop */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setMobileSidebarOpen(false)} aria-hidden="true" />
+      )}
+
       {/* Sidebar */}
-      <div className={`fixed left-0 top-0 h-full bg-gradient-to-b from-[#14141D] to-[#1a1a25] text-white transition-all duration-300 z-30 ${isSidebarOpen ? "w-64" : "w-20"}`}>
+      <div className={`fixed left-0 top-0 h-full bg-gradient-to-b from-[#14141D] to-[#1a1a25] text-white transition-transform md:transition-all duration-300 z-40 w-64 ${mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 ${isSidebarOpen ? "md:w-64" : "md:w-20"}`}>
         <div className="p-4 flex items-center justify-between border-b border-white/10">
           {isSidebarOpen ? (
             <div className="flex items-center gap-2">
@@ -1291,12 +1329,13 @@ const AdminDashboard = () => {
               <img src="/images/logo1.png" alt="Omark" className="w-full h-full object-contain" onError={(e) => { e.target.style.display = "none"; }} />
             </div>
           )}
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-1 hover:bg-white/10 rounded-lg transition"><Menu size={18} /></button>
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="hidden md:block p-1 hover:bg-white/10 rounded-lg transition" aria-label="Toggle sidebar"><Menu size={18} /></button>
+          <button onClick={() => setMobileSidebarOpen(false)} className="md:hidden p-1 hover:bg-white/10 rounded-lg transition" aria-label="Close menu"><X size={18} /></button>
         </div>
 
         <nav className="p-4 space-y-1 overflow-y-auto" style={{ maxHeight: "calc(100vh - 160px)" }}>
           {sidebarItems.map((item) => (
-            <button key={item.id} onClick={() => setActiveTab(item.id)}
+            <button key={item.id} onClick={() => { setActiveTab(item.id); setMobileSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-md transition-all cursor-pointer ${activeTab === item.id ? "bg-red-800 text-white shadow-lg" : "text-gray-400 hover:bg-white/10 hover:text-white"}`}
             >
               <item.icon size={18} className="flex-shrink-0" />
@@ -1333,9 +1372,12 @@ const AdminDashboard = () => {
       </div>
 
       {/* Main */}
-      <div className={`transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-20"}`}>
+      <div className={`transition-all duration-300 ml-0 ${isSidebarOpen ? "md:ml-64" : "md:ml-20"}`}>
         <header className="bg-white shadow-sm sticky top-0 z-20">
-          <div className="px-6 py-4 flex justify-between items-center">
+          <div className="px-4 sm:px-6 py-4 flex justify-between items-center gap-3">
+            <button onClick={() => setMobileSidebarOpen(true)} className="md:hidden p-2 -ml-1 text-gray-600 hover:bg-gray-100 rounded-lg transition" aria-label="Open menu">
+              <Menu size={22} />
+            </button>
             <div className="flex-1 max-w-md">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -1375,7 +1417,7 @@ const AdminDashboard = () => {
       {/* Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={closeModal}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => { if (!isSubmitting) closeModal(); }}>
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <div className="sticky top-0 bg-white border-b border-gray-100 p-4 flex justify-between items-center">
                 <h3 className="text-xl font-bold text-[#14141D]">{getModalTitle()}</h3>
@@ -1405,7 +1447,9 @@ const AdminDashboard = () => {
 
                 {/* Image upload */}
                 {hasImageUpload && (
-                  <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center">
+                  <div className="border-2 border-dashed border-red-200 rounded-lg p-4 text-center bg-red-50/40">
+                    <p className="text-sm font-medium text-gray-700 mb-1 text-left">{modalType === "projects" ? "Cover Image" : heroOrGalleryVideo ? "Media" : "Image"} <span className="text-red-500">*</span></p>
+                    {modalType === "projects" && <p className="text-xs text-gray-400 mb-3 text-left">The main photo shown on the project card. Required — separate from the gallery above.</p>}
                     <Upload size={24} className="mx-auto text-gray-400 mb-2" />
                     <p className="text-sm text-gray-500 mb-2">{imageFile ? imageFile.name : (editingItem?.image || editingItem?.url) ? `Current ${heroOrGalleryVideo ? "video" : "image"} — upload new to replace` : `Select ${heroOrGalleryVideo ? "video" : "image"} to upload`}</p>
                     <input type="file" accept={heroOrGalleryVideo ? "video/*" : "image/*"} onChange={(e) => setImageFile(e.target.files[0] || null)} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-red-50 file:text-red-700 hover:file:bg-red-100" />
@@ -1413,8 +1457,10 @@ const AdminDashboard = () => {
                 )}
 
                 <div className="flex gap-3 pt-4">
-                  <button onClick={closeModal} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
-                  <button onClick={handleSave} className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2 rounded-lg">Save</button>
+                  <button onClick={closeModal} disabled={isSubmitting} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Cancel</button>
+                  <button onClick={handleSave} disabled={isSubmitting} className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2 rounded-lg disabled:opacity-70 disabled:cursor-not-allowed">
+                    {isSubmitting ? (<><Loader2 size={16} className="animate-spin" /> Saving…</>) : (editingItem ? "Save Changes" : "Save")}
+                  </button>
                 </div>
               </div>
             </motion.div>

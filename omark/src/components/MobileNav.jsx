@@ -339,7 +339,7 @@ const MobileNav = ({ isOpen, closeMenu }) => {
           from { transform: translateX(100%); }
           to { transform: translateX(0); }
         }
-        @keyframes fadeIn {
+        @keyframes fadeInDown {
           from {
             opacity: 0;
             transform: translateY(-10px);
@@ -350,7 +350,7 @@ const MobileNav = ({ isOpen, closeMenu }) => {
           }
         }
         .animate-fadeIn {
-          animation: fadeIn 0.2s ease-out forwards;
+          animation: fadeInDown 0.2s ease-out forwards;
         }
       `}</style>
     </>
